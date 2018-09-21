@@ -1,0 +1,1 @@
+This adapter exposes a pin of a CCTools board as a binary input.

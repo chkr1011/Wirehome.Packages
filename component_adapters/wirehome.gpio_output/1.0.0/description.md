@@ -1,0 +1,1 @@
+This component adapter uses a set of GPIOs as outputs.

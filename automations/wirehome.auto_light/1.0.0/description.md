@@ -1,0 +1,1 @@
+This automation connects a button with a component and toggles the power state.

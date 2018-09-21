@@ -1,0 +1,1 @@
+The component wraps a relay from a CC-Tools board.

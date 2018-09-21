@@ -1,0 +1,1 @@
+This is a test component adapter which writes _all_ received commands to the log.

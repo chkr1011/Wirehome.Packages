@@ -7,8 +7,6 @@ def main(parameters):
             The welcome message as str.
     """
 
-    name = "world"
-    if "name" in parameters:
-        name = parameters["name"]
+    name = parameters.get("name", "World")
 
-    return "hello " + name
+    return "Hello " + name
