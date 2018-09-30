@@ -1,0 +1,1 @@
+This logic is a simple motion detector which supports the states `idle` and `detected`.

@@ -1,0 +1,1 @@
+This logic is a simple button which supports the states `pressed` and `released`.

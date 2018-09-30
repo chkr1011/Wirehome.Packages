@@ -1,0 +1,1 @@
+This logic is a simple state machine.

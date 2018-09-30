@@ -1,0 +1,1 @@
+This logic is a simple socket which supports the states `on` and `off`.
