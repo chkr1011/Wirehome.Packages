@@ -28,4 +28,4 @@ def __handle_mqtt_message__(properties):
         "new_state": payload_string
     }
 
-    adapter.publish_adapter_message(properties)
+    publish_adapter_message(properties)

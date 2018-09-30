@@ -57,7 +57,7 @@ def __handle_mqtt_message__(properties):
 
     properties = {"type": type}
 
-    adapter.publish_adapter_message(properties)
+    publish_adapter_message(properties)
 
 
 def __request_power_consumption__():

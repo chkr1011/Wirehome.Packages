@@ -62,8 +62,8 @@ def __poll_status__():
             global status
             status.temperature = http_result["content"]["main"]["temp"]
             status.humidity = http_result["content"]["main"]["humidity"]
-            status.sunrise = convert.file_time_to_local_time(http_result["content"]["sys"]["sunrise"])
-            status.sunset = convert.file_time_to_local_time(http_result["content"]["sys"]["sunset"])
+            status.sunrise = date_time_parser.file_time_to_local_time(http_result["content"]["sys"]["sunrise"])
+            status.sunset = date_time_parser.file_time_to_local_time(http_result["content"]["sys"]["sunset"])
             status.condition = http_result["content"]["weather"][0]["main"]
 
             conditionIcon = http_result["content"]["weather"][0]["icon"]
