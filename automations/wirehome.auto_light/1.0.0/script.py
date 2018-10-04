@@ -33,8 +33,8 @@ def __motion_detector_callback__(properties):
     if properties["new_value"] == "detected":
         __set_lights_state__("on")
 
-    
-def __countdown_callback__(uid):
+
+def __countdown_callback__(_):
     for component_uid in config["motion_detectors"]:
         if component_registry.get_status(component_uid, "motion_detection.state") == "detected":
             __restart_countdown__()

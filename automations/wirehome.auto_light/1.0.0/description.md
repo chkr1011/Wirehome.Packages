@@ -1,1 +1,13 @@
-This automation connects a button with a component and toggles the power state.
+# Summary 
+This automation turns on a component when motion is detected. It also turns it of after the time of `duration` when motion is no longer detected.
+
+# Configuration
+```json
+{
+    "config":{
+        "motion_detectors": ["myDetector1"],
+        "targets": ["myLamp1", "myLamp2"],
+        "duration": 5000 // 5 secs in ms
+    }
+}
+```
