@@ -37,7 +37,6 @@ def __initialize__(message):
 
 
 def __set_state__(state):
-
     adapter_result = publish_adapter_message({
         "type": state
     })
@@ -66,6 +65,8 @@ def __set_state__(state):
         if power_consumption != None:
             component.set_status("power.consumption", power_consumption)
 
+        start_auto_off_countdown = True
+
     if state == "move_down":
         component.set_status("roller_shutter.state", "moving_down")
         component.set_status("power.state", "on")
@@ -73,6 +74,19 @@ def __set_state__(state):
         if power_consumption != None:
             component.set_status("power.consumption", power_consumption)
 
+        start_auto_off_countdown = True
+
+    auto_off_timeout = globals().get("config", {}).get("auto_off_timeout", 60000)
+    start_auto_off_countdown = state == "move_up" or state == "move_down"
+
+    if start_auto_off_countdown == True and auto_off_timeout != None:
+        countdown_uid = scope["component_uid"] + ".auto_off"
+        scheduler.start_countdown(countdown_uid, auto_off_timeout, __auto_off_callback__)
+
     return {
         "type": "success"
     }
+
+
+def __auto_off_callback__(_):
+    __set_state__("turn_off")
