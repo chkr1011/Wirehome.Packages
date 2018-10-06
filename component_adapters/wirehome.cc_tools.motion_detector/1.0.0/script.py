@@ -30,11 +30,7 @@ def __publish_state__():
     service_result = services.invoke(SERVICE_ID, "get_state", service_parameters)
 
     state = service_result["pin_state"]
-
-    try:
-        is_inverted = config["is_inverted"]
-    except:
-        is_inverted = False
+    is_inverted = config.get("is_inverted", False)
 
     motion_detection_state = "idle"
 
