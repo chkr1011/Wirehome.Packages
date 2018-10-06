@@ -34,7 +34,9 @@ def __initialize__(message):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    return __set_state__("off")
+    initial_state = globals().get("config", {}).get("initial_state", "off")
+
+    return __set_state__(initial_state)
 
 
 def __set_state__(state):
