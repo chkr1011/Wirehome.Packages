@@ -13,8 +13,8 @@ def process_adapter_message(properties):
 def __initialize__():
     topic = config["topic"]
 
-    global subscription_uid
-    subscription_uid = mqtt.subscribe(topic, __handle_mqtt_message__)
+    subscription_uid = "wirehome.mqtt.button:" + scope["component_uid"]
+    mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
 
     return {"type": "success"}
 

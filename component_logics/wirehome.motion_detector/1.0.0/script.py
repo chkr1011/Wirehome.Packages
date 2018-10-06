@@ -5,7 +5,8 @@ def process_logic_message(message):
         return __initialize__(message)
 
     return {
-        "type": "exception.not_supported"
+        "type": "exception.not_supported",
+        "origin_type": type
     }
 
 
@@ -18,14 +19,17 @@ def process_adapter_message(message):
         if new_state == "idle":
             component.set_status("motion_detection.state", "idle")
         elif new_state == "detected":
-            component.set_status("motion_detection.state", "detected")
+            is_enabled = component.get_setting("is_enabled", True)
+            if is_enabled:
+                component.set_status("motion_detection.state", "detected")
 
         return {
             "type": "success"
         }
 
     return {
-        "type": "not_supported"
+        "type": "exception.not_supported",
+        "origin_type": type
     }
 
 

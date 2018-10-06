@@ -11,8 +11,9 @@ def process_adapter_message(properties):
 
 
 def __initialize__():
+    subscription_uid = "wirehome.mqtt.sensor:" + scope["component_uid"]
     topic = config["topic"]
-    mqtt.subscribe(topic, __handle_mqtt_message__)
+    mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
 
 
 def __handle_mqtt_message__(properties):

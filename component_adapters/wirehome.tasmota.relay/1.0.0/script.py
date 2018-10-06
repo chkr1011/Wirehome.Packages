@@ -19,14 +19,17 @@ def __initialize__():
     supports_power_consumption = config.get("supports_power_consumption", False)
 
     if supports_power_consumption:
-        mqtt.subscribe("stat/" + device_uid + "/STATUS8", __power_consumption_received__)
+        subscription_uid = "wirehome.tasmota.relay.ps:" + scope["component_uid"]
+
+        mqtt.subscribe(subscription_uid, "stat/" + device_uid + "/STATUS8", __power_consumption_received__)
 
         update_interval = config.get("power_consumption_update_interval", 5000)
         timer_uid = "wirehome.tasmota.relay.pc.timer." + device_uid
         scheduler.start_timer(timer_uid, update_interval, __request_power_consumption__)
 
+    subscription_uid = "wirehome.tasmota.relay.stat:" + scope["component_uid"]
     topic = "stat/" + device_uid + "/POWER"
-    mqtt.subscribe(topic, __handle_mqtt_message__)
+    mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
 
     return {"type": "success"}
 
