@@ -20,7 +20,17 @@ def process_logic_message(message):
 
 
 def process_adapter_message(message):
-    pass
+    type = message.get("type", None)
+    if type == None:
+        return
+
+    if type == "power_state_changed":
+        state = message.get("power_state", "off")
+
+        if state == "on":
+            component.set_status("power.state", "on")
+        else:
+            component.set_status("power.state", "off")
 
 
 def __initialize__(message):
@@ -48,19 +58,26 @@ def __set_state__(state):
         "type": type
     })
 
-    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
-
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
+    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
+
+    new_power_state = "off"
+
     if state == "on":
-        component.set_status("power.state", "on")
+        new_power_state = "on"
 
         if static_power_consumption != None:
             component.set_status("power.consumption", static_power_consumption)
 
     elif state == "off":
-        component.set_status("power.state", "off")
-
         if static_power_consumption != None:
             component.set_status("power.consumption", 0)
+
+    if adapter_result.get("skip_status_update", False) == False:
+        component.set_status("power.state", new_power_state)
+
+    return {
+        "type": "success"
+    }
