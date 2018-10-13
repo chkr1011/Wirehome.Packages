@@ -1,5 +1,5 @@
-def process_adapter_message(properties):
-    type = properties.get("type", None)
+def process_adapter_message(message):
+    type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__()
@@ -19,13 +19,13 @@ def __initialize__():
     return {"type": "success"}
 
 
-def __handle_mqtt_message__(properties):
-    payload = properties["payload"]
+def __handle_mqtt_message__(mqtt_message):
+    payload = mqtt_message["payload"]
     payload_string = convert.to_string(payload)
 
-    properties = {
+    message = {
         "type": "state_changed",
         "new_state": payload_string
     }
 
-    publish_adapter_message(properties)
+    publish_adapter_message(message)

@@ -2,10 +2,14 @@ SERVICE_ID = "wirehome.cc_tools.board_manager"
 
 
 def process_adapter_message(message):
-    if message["type"] == "initialize":
+    type = message.get("type", None)
+    if type == "initialize":
         return __initialize__()
 
-    return {"type": "exception.not_supported"}
+    return {
+        "type": "exception.not_supported",
+        "origin_type": type
+    }
 
 
 def __initialize__():
