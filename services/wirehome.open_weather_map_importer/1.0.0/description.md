@@ -1,5 +1,4 @@
 # Summary
-
 This service loads weather data from _Open Weather Map_ (an account is required) and forwards the data to global variables. The following global variables are set.
 
 * `outdoor.temperature`
@@ -11,12 +10,10 @@ This service loads weather data from _Open Weather Map_ (an account is required)
 * `open_weather_map.condition_code`
 
 # Parameters
-
 The service requires the following parameters.
 
 
 ## Mandatory parameters
-
 The following parameters are required for every kind of query.
 
 ```json
@@ -29,9 +26,7 @@ The following parameters are required for every kind of query.
 }
 ```
 
-
 ## Query by city
-
 The following parameters are required for a query by a city name.
 
 ```json
@@ -44,9 +39,7 @@ The following parameters are required for a query by a city name.
 }
 ```
 
-
 ## Query by coordinates
-
 The following parameters are required for a query by it's coordinates.
 
 ```json
@@ -57,5 +50,20 @@ The following parameters are required for a query by it's coordinates.
         "latitude": 51.11893,
         "longitude": 6.53095
     }
+}
+```
+
+## Data publishing
+The following parameters are optional (`True` by default) and define whether the respective value should be read and pushed to the global variables.
+
+```json
+{
+    "config":
+        {
+            "import_temperature": true,
+            "import_humidity": true,
+            "import_sunrise": true,
+            "import_sunset": true
+        }
 }
 ```
