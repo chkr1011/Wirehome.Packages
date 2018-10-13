@@ -5,7 +5,8 @@ def process_logic_message(message):
         return __initialize__(message)
 
     return {
-        "type": "exception.not_supported"
+        "type": "exception.not_supported",
+        "origin_type": type
     }
 
 
@@ -14,26 +15,31 @@ def process_adapter_message(message):
 
     if type == "state_changed":
         new_state = message.get("new_state", None)
+
         if new_state == "pressed":
-            component.set_status("button.state", "pressed")
+            if component.get_setting("is_enabled", True) != False:
+                component.set_status("button.state", "pressed")
         elif new_state == "released":
             component.set_status("button.state", "released")
+        else:
+            return {
+                "type": "exception.not_supported",
+                "new_state": new_state
+            }
 
         return {
             "type": "success"
         }
 
     return {
-        "type": "not_supported"
+        "type": "exception.not_supported",
+        "origin_type": type
     }
 
 
 def __initialize__(message):
-    component.set_status("button.state", "released")
-    publish_adapter_message({
+    component.set_status("button.state", "unknown")
+
+    return publish_adapter_message({
         "type": "initialize"
     })
-
-    return {
-        "type": "success"
-    }
