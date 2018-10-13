@@ -5,7 +5,8 @@ def process_logic_message(message):
         return __initialize__(message)
 
     return {
-        "type": "exception.not_supported"
+        "type": "exception.not_supported",
+        "origin_type": type
     }
 
 
@@ -26,18 +27,23 @@ def process_adapter_message(message):
         elif sensor_type == "humidity":
             component.set_status("humidity.value", value)
 
+        global_variable = config.get("publish_as_global_variable", None)
+        if global_variable != None:
+            global_variables.set(global_variable, value)
+
         return {
             "type": "success"
         }
 
     return {
-        "type": "not_supported"
+        "type": "not_supported",
+        "origin_type": type
     }
 
 
 def __initialize__(message):
     sensor_type = config.get("sensor_type", None)
-    
+
     if sensor_type == "temperature":
         component.set_status("temperature.value", "unknown")
     elif sensor_type == "humidity":
