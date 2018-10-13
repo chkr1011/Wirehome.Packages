@@ -50,10 +50,10 @@ def __set_state__(state):
         "type": type
     })
 
-    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
-
     if adapter_result.get("type", None) != "success":
         return adapter_result
+
+    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
 
     if state == "on":
         component.set_status("power.state", "on")
@@ -66,3 +66,7 @@ def __set_state__(state):
 
         if static_power_consumption != None:
             component.set_status("power.consumption", 0)
+
+    return {
+        "type": "success"
+    }
