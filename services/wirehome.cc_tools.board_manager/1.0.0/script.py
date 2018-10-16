@@ -65,7 +65,8 @@ def start():
     }
 
     global message_bus_subscription
-    message_bus_subscription = message_bus.subscribe(filter, __handle_interrupt__)
+    uid = "wirehome.cc_tools.board_manager.gpio_state_changed"
+    message_bus_subscription = message_bus.subscribe(uid, filter, __handle_interrupt__)
 
     scheduler.start_thread("cc_tools.board_manager.poll_states", __poll_states__)
     scheduler.start_thread("cc_tools.board_manager.poll_interrupts", __poll_interrupts__)
@@ -354,11 +355,11 @@ def __poll_state__(device):
 
     device.buffer = new_state
 
-    properties = {
+    message = {
         "type": "cc_tools.board_manager.event.state_changed",
         "device_uid": device.uid,
         "new_state": new_state,
         "old_state": old_state
     }
 
-    message_bus.publish(properties)
+    message_bus.publish(message)

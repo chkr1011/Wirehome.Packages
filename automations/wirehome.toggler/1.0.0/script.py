@@ -14,8 +14,9 @@ def activate():
             "new_value": "pressed"
         }
 
-        subscription = message_bus.subscribe(filter, __button_callback__)
-        subscriptions.append(subscription)
+        subscription_uid = scope["automation_uid"] + ":status_changed->" + button_uid
+        message_bus.subscribe(subscription_uid, filter, __button_callback__)
+        subscriptions.append(subscription_uid)
 
 
 def deactivate():

@@ -17,8 +17,9 @@ def activate():
             "status_uid": "motion_detection.state"
         }
 
-        subscription = message_bus.subscribe(filter, __motion_detector_callback__)
-        subscriptions.append(subscription)
+        subscription_uid = scope["automation_uid"] + ":status_changed->" + component_uid
+        message_bus.subscribe(subscription_uid, filter, __motion_detector_callback__)
+        subscriptions.append(subscription_uid)
 
 
 def deactivate():

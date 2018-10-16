@@ -49,7 +49,7 @@ def __initialize__(message):
     if position_tracker_max > 0:
         component_uid = scope["component_uid"]
         timer_uid = "wirehome.logic.roller_shutter.position_tracker:" + component_uid
-        scheduler.start_timer(timer_uid, 250, __position_tracker_callback__)
+        scheduler.attach_to_default_timer(timer_uid, __position_tracker_callback__)
 
     return __set_state__("turn_off")
 
@@ -123,10 +123,12 @@ def __set_position__(message):
     elif target_position < current_position:
         return __set_state__("move_up")
 
-def __position_tracker_callback__(elapsed_time, state):
+def __position_tracker_callback__(parameters):
     if current_state == "off":
         return
     
+    elapsed_time = parameters["elapsed_millis"]
+
     global position_tracker_current
 
     if current_state == "moving_up":    

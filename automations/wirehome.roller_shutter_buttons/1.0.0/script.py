@@ -23,10 +23,11 @@ def __attach_button__(uid):
         "new_value": "pressed"
     }
 
-    subscription = message_bus.subscribe(filter, __button_callback__)
+    subscription_uid = scope["automation_uid"] + ":status_changed->" + uid
+    message_bus.subscribe(subscription_uid, filter, __button_callback__)
     
     global subscriptions
-    subscriptions.append(subscription)
+    subscriptions.append(subscription_uid)
 
 
 def __button_callback__(message):

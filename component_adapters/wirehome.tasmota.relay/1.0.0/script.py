@@ -63,7 +63,7 @@ def __handle_mqtt_message__(properties):
     publish_adapter_message(properties)
 
 
-def __request_power_consumption__(elapsed_time, state):
+def __request_power_consumption__(parameters):
     device_uid = config["device_uid"]
 
     parameters = {

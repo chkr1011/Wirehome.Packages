@@ -18,7 +18,8 @@ def __initialize__():
         "device_uid": config["device_uid"]
     }
 
-    message_bus.subscribe(filter, __state_changed_callback__)
+    uid = "wirehome.cc_tools.state_changed:" + scope["component_uid"]
+    message_bus.subscribe(uid, filter, __state_changed_callback__)
 
     __publish_state__()
 

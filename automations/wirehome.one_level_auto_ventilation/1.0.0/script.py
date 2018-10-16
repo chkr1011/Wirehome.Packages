@@ -17,8 +17,9 @@ def activate():
             "status_uid": "motion_detection.state"
         }
 
-        subscription = message_bus.subscribe(filter, __motion_detector_callback__)
-        subscriptions.append(subscription)
+        subscription_uid = scope["automation_uid"] + ":status_changed->" + motion_detector
+        message_bus.subscribe(subscription_uid, filter, __motion_detector_callback__)
+        subscriptions.append(subscription_uid)
 
 
 def deactivate():
@@ -34,7 +35,7 @@ def __motion_detector_callback__(message):
         __set_level__(target_level)
 
 
-def __countdown_callback__(uid):
+def __countdown_callback__(_):
     for component_uid in config["motion_detectors"]:
         if component_registry.get_status(component_uid, "motion_detection.state") == "detected":
             __set_level__(1)
