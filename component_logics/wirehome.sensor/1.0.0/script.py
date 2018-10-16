@@ -10,6 +10,15 @@ def process_logic_message(message):
     }
 
 
+def __initialize__(message):
+    __set_sensor_value__("unknown")
+    component.set_status("status.is_outdated", True)
+
+    return publish_adapter_message({
+        "type": "initialize"
+    })
+
+
 def process_adapter_message(message):
     type = message.get("type", None)
 
@@ -20,12 +29,7 @@ def process_adapter_message(message):
         if value_type == "string":
             value = convert.to_double(value)
 
-        sensor_type = config.get("sensor_type", None)
-
-        if sensor_type == "temperature":
-            component.set_status("temperature.value", value)
-        elif sensor_type == "humidity":
-            component.set_status("humidity.value", value)
+        __set_sensor_value__(value)
 
         global_variable = config.get("publish_as_global_variable", None)
         if global_variable != None:
@@ -41,14 +45,23 @@ def process_adapter_message(message):
     }
 
 
-def __initialize__(message):
+def __start_outdated_countdown__():
+    uid = "wirehome.sensor.countdown.outdated:" + scope["component_uid"]
+    timeout = config.get("outdated_timeout", 60000)
+    scheduler.start_countdown(uid, timeout, __on_outdated_countdown_callback__)
+
+
+def __on_outdated_countdown_callback__(_):
+    component.set_status("status.is_outdated", True)
+
+
+def __set_sensor_value__(value):
     sensor_type = config.get("sensor_type", None)
 
     if sensor_type == "temperature":
-        component.set_status("temperature.value", "unknown")
+        component.set_status("temperature.value", value)
     elif sensor_type == "humidity":
-        component.set_status("humidity.value", "unknown")
+        component.set_status("humidity.value", value)
 
-    return publish_adapter_message({
-        "type": "initialize"
-    })
+    component.set_status("status.is_outdated", False)
+    __start_outdated_countdown__()
