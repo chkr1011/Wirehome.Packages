@@ -86,6 +86,6 @@ def __poll_status__():
             global_variables.set("outdoor.condition", status.condition)
             global_variables.set("outdoor.condition.image_url", conditionIcon)
 
-            global_variables.set("open_weahter_map.condition_code", weather[0]["id"])
+            global_variables.set("open_weather_map.condition_code", weather[0]["id"])
 
         sleep(update_interval)
