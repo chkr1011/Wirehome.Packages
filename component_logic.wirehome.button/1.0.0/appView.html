@@ -1,0 +1,8 @@
+<div>
+    <span class="status-icon pull-left fas fa-dot-circle" ng-class="component.getStatus('button.state')==='pressed' ? 'status-icon-danger' : 'status-icon-default'"></span>
+
+    <a href="#" class="btn pull-right action-button" ng-class="component.getSetting('is_enabled', true)===false ? 'btn-danger' : 'btn-success'"
+        ng-click="ctrl.componentService.toggleIsEnabled(component)">
+        {{ component.getSetting('is_enabled', true)===false ? 'INACTIVE' : 'ACTIVE' }}
+    </a>
+</div>

@@ -1,0 +1,6 @@
+<div class="pull-right btn-group">
+    <a href="#" class="btn" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.turnOn(component)">ON</a>
+    <a href="#" class="btn" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
+        ng-click="ctrl.componentService.turnOff(component)">OFF</a>
+</div>

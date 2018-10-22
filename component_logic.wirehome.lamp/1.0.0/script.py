@@ -34,15 +34,18 @@ def process_adapter_message(message):
 
 
 def __initialize__(message):
-    # Use a static value for power consumption here if added to the config.
-
     component.set_status("power.state", "unknown")
+    component.set_configuration("app.view_source", repository.get_file_uri(scope["logic_uid"], "appView.html"))
+
     adapter_result = publish_adapter_message({
         "type": "initialize"
     })
 
     if adapter_result.get("type", None) != "success":
         return adapter_result
+
+    if adapter_result.get("supports_brightness", False) == True:
+        component.set_status("brightness.value", "unknown")
 
     return __set_state__("off")
 

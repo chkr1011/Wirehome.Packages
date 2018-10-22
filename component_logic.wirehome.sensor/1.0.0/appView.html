@@ -4,9 +4,9 @@
         class="component-status-text label label-warning">Warning!</span>
     <span ng-if="component.getStatus('humidity.value')<component.getSetting('app.humidity.warning_value', 60)" class="component-status-text label label-success">OK</span>
 
-    <span class="sensor-value">{{(component.status['humidity.value'] | number:0) + ' % r.F.' }}</span>
+    <span class="sensor-value">{{(component.getStatus('humidity.value') | number:0) + ' % r.F.'}}</span>
 </div>
 
 <div ng-if="component.hasStatus('temperature.value')">
-    <span class="sensor-value">{{(component.status['temperature.value'] | number:1) + ' °C' }}</span>
+    <span class="sensor-value">{{(component.getStatus('temperature.value') | number:1) + ' °C'}}</span>
 </div>

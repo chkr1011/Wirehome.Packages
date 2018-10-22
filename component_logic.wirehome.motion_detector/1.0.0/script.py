@@ -35,10 +35,8 @@ def process_adapter_message(message):
 
 def __initialize__(message):
     component.set_status("motion_detection.state", "unknown")
-    publish_adapter_message({
+    component.set_configuration("app.view_source", repository.get_file_uri(scope["logic_uid"], "appView.html"))
+
+    return publish_adapter_message({
         "type": "initialize"
     })
-
-    return {
-        "type": "success"
-    }

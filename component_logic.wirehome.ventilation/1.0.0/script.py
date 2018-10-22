@@ -39,6 +39,7 @@ def process_adapter_message(message):
 def __initialize__(message):
     component.set_status("level.current", "unknown")
     component.set_configuration("level.max", "unknown")
+    component.set_configuration("app.view_source", repository.get_file_uri(scope["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
