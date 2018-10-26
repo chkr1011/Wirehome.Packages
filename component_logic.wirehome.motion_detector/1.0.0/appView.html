@@ -3,6 +3,6 @@
 
     <a href="#" class="btn pull-right action-button" ng-class="component.getSetting('is_enabled', true)===false ? 'btn-danger' : 'btn-success'"
         ng-click="ctrl.componentService.toggleIsEnabled(component)">
-        {{ component.getSetting('is_enabled', true)===false ? 'ACTIVE' : 'INACTIVE' }}
+        {{ component.getSetting('is_enabled', true)===true ? 'ACTIVE' : 'INACTIVE' }}
     </a>
 </div>
