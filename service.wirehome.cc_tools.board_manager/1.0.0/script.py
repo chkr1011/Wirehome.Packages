@@ -68,8 +68,11 @@ def start():
     uid = "wirehome.cc_tools.board_manager.gpio_state_changed"
     message_bus_subscription = message_bus.subscribe(uid, filter, __handle_interrupt__)
 
-    scheduler.start_thread("cc_tools.board_manager.poll_states", __poll_states__)
-    scheduler.start_thread("cc_tools.board_manager.poll_interrupts", __poll_interrupts__)
+    if len(devices_with_state_polling) > 0:
+        scheduler.start_thread("cc_tools.board_manager.poll_states", __poll_states_thread__)
+
+    if len(devices_with_interrupt_polling) > 0:
+        scheduler.start_thread("cc_tools.board_manager.poll_interrupts", __poll_interrupts_thread__)
 
 
 def stop():
@@ -268,7 +271,7 @@ def __initialize_device__(device_uid, config):
         device.board == BOARD_HS_REL_8 or
         device.board == BOARD_HS_PE_8_OUT or
         device.board == BOARD_HS_PE_16_OUT or
-        device.board == BOARD_HS_RB_16):
+            device.board == BOARD_HS_RB_16):
         output_devices.append(device)
 
     print("initialized device " + device.uid)
@@ -287,13 +290,14 @@ def __initialize_input_hspe16__(device):
         gpio.enable_interrupt(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
 
 
-def __handle_interrupt__(properties):
-    gpio_host_id = properties["gpio_host_id"]
-    gpio_id = properties["gpio_id"]
-    new_state = properties["new_state"]
+def __handle_interrupt__(message):
+    new_state = message["new_state"]
 
     if new_state != "low":
         return
+
+    gpio_host_id = message["gpio_host_id"]
+    gpio_id = message["gpio_id"]
 
     for device_uid in devices:
         device = devices[device_uid]
@@ -302,52 +306,44 @@ def __handle_interrupt__(properties):
             __poll_state__(device)
 
 
-def __poll_interrupts__():
+def __poll_interrupts_thread__(_):
     while is_running == True:
-        if len(devices_with_interrupt_polling) == 0:
-            sleep(1)
-        else:
-            sleep(0.010)  # 10 ms
+        sleep(0.010)  # 10 ms
 
         gpio_states = {}
 
         for device in devices_with_interrupt_polling:
-            key = device.interrupt_gpio_host_id + str(device.interrupt_gpio_id)
-            
-            if not key in gpio_states:
-                gpio_states[key] = gpio.read_state(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
+            gpio_key = device.interrupt_gpio_host_id + str(device.interrupt_gpio_id)
 
-            if gpio_states[key] == "low":
+            if not gpio_key in gpio_states:
+                gpio_states[gpio_key] = gpio.read_state(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
+
+            if gpio_states[gpio_key] == "low":
                 __poll_state__(device)
 
 
-def __poll_states__():
+def __poll_states_thread__(_):
     while is_running == True:
-        if len(devices_with_state_polling) == 0:
-            sleep(1)
-        else:
-            sleep(0.010)  # 10 ms
+        sleep(0.100)  # 100 ms
 
         for device in devices_with_state_polling:
             __poll_state__(device)
 
 
 def __poll_state__(device):
-    read_buffer = None
+    new_state = None
 
     if device.board == BOARD_HS_PE_16_IN:
         # Set target register to INPUT-0 register and read two register bytes (INPUT-0 and INPUT-1)
         write_buffer = 0x0
-        read_buffer = i2c.write_read_as_ulong(device.bus_id, device.address, write_buffer, 1, 2)
+        new_state = i2c.write_read_as_ulong(device.bus_id, device.address, write_buffer, 1, 2)
+    elif device.board == BOARD_HS_PE_8_IN:
+        new_state = i2c.read_as_ulong(device.bus_id, device.address, 1)
 
-    if device.board == BOARD_HS_PE_8_IN:
-        read_buffer = i2c.read_as_ulong(device.bus_id, device.address, 1)
-
-    if read_buffer == None:
+    if new_state == None:
         return
 
     old_state = device.buffer
-    new_state = read_buffer
     has_changed = old_state != new_state
 
     if has_changed == False:
