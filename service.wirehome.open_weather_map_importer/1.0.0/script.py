@@ -32,7 +32,7 @@ def get_status():
     }
 
 
-def __poll_status__():
+def __poll_status__(_):
     query_mode = config.get("query_mode", "city")
     app_id = config.get("app_id", None)
     update_interval = config.get("update_interval", 60)
@@ -56,36 +56,39 @@ def __poll_status__():
     while is_running == True:
         http_result = http_client.send(parameters)
 
-        if http_result["status_code"] == 200:
-            main = http_result["content"]["main"]
-            sys = http_result["content"]["sys"]
-            weather = http_result["content"]["weather"]
+        if http_result.get("type", None) == "success" and http_result.get("status_code", -1) == 200:
+            try:
+                main = http_result["content"]["main"]
+                sys = http_result["content"]["sys"]
+                weather = http_result["content"]["weather"]
 
-            global status
-            status.temperature = main["temp"]
-            status.humidity = main["humidity"]
-            status.sunrise = date_time_parser.file_time_to_local_time(sys["sunrise"])
-            status.sunset = date_time_parser.file_time_to_local_time(sys["sunset"])
-            status.condition = weather[0]["main"]
+                global status
+                status.temperature = main["temp"]
+                status.humidity = main["humidity"]
+                status.sunrise = date_time_parser.file_time_to_local_time(sys["sunrise"])
+                status.sunset = date_time_parser.file_time_to_local_time(sys["sunset"])
+                status.condition = weather[0]["main"]
 
-            conditionIcon = weather[0]["icon"]
-            conditionIcon = "http://openweathermap.org/img/w/" + conditionIcon + ".png"
+                conditionIcon = weather[0]["icon"]
+                conditionIcon = "http://openweathermap.org/img/w/" + conditionIcon + ".png"
 
-            if config.get("import_temperature", True) == True:
-                global_variables.set("outdoor.temperature", status.temperature)
+                if config.get("import_temperature", True) == True:
+                    global_variables.set("outdoor.temperature", status.temperature)
 
-            if config.get("import_humidity", True) == True:
-                global_variables.set("outdoor.humidity", status.humidity)
+                if config.get("import_humidity", True) == True:
+                    global_variables.set("outdoor.humidity", status.humidity)
 
-            if config.get("import_sunrise", True) == True:
-                global_variables.set("outdoor.sunrise", status.sunrise)
+                if config.get("import_sunrise", True) == True:
+                    global_variables.set("outdoor.sunrise", status.sunrise)
 
-            if config.get("import_sunset", True) == True:
-                global_variables.set("outdoor.sunset", status.sunset)
+                if config.get("import_sunset", True) == True:
+                    global_variables.set("outdoor.sunset", status.sunset)
 
-            global_variables.set("outdoor.condition", status.condition)
-            global_variables.set("outdoor.condition.image_url", conditionIcon)
+                global_variables.set("outdoor.condition", status.condition)
+                global_variables.set("outdoor.condition.image_url", conditionIcon)
 
-            global_variables.set("open_weather_map.condition_code", weather[0]["id"])
+                global_variables.set("open_weather_map.condition_code", weather[0]["id"])
+            except:
+                log.error("Error while polling Open Weather Map data. " + sys.exc_info()[0])
 
         sleep(update_interval)
