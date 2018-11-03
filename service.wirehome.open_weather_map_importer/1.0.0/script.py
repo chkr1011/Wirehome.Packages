@@ -1,5 +1,4 @@
-from time import sleep
-
+import time
 
 class Status:
     sunrise = None
@@ -65,12 +64,12 @@ def __poll_status__(_):
                 global status
                 status.temperature = main["temp"]
                 status.humidity = main["humidity"]
-                status.sunrise = date_time_parser.file_time_to_local_time(sys["sunrise"])
-                status.sunset = date_time_parser.file_time_to_local_time(sys["sunset"])
+                status.sunrise = time.strftime('%H:%M:%S', time.localtime(sys["sunrise"]))
+                status.sunset = time.strftime('%H:%M:%S', time.localtime(sys["sunset"]))
                 status.condition = weather[0]["main"]
 
                 conditionIcon = weather[0]["icon"]
-                conditionIcon = "http://openweathermap.org/img/w/" + conditionIcon + ".png"
+                conditionIcon = "https://openweathermap.org/img/w/" + conditionIcon + ".png"
 
                 if config.get("import_temperature", True) == True:
                     global_variables.set("outdoor.temperature", status.temperature)
@@ -91,4 +90,4 @@ def __poll_status__(_):
             except:
                 log.error("Error while polling Open Weather Map data. " + sys.exc_info()[0])
 
-        sleep(update_interval)
+        time.sleep(update_interval)
