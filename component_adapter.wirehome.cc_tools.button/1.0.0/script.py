@@ -5,11 +5,11 @@ def process_adapter_message(message):
     type = message.get("type", None)
     if type == "initialize":
         return __initialize__()
-
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    else:
+        return {
+            "type": "exception.not_supported",
+            "origin_type": type
+        }
 
 
 def __initialize__():
@@ -18,8 +18,8 @@ def __initialize__():
         "device_uid": config["device_uid"]
     }
 
-    uid = "wirehome.cc_tools.state_changed:" + scope["component_uid"]
-    message_bus.subscribe(uid, filter, __state_changed_callback__)
+    uid = "wirehome.cc_tools.state_changed:" + context["component_uid"]
+    wirehome.message_bus.subscribe(uid, filter, __state_changed_callback__)
 
     __publish_state__()
 
@@ -30,7 +30,7 @@ def __publish_state__():
         "port":  config["port"]
     }
 
-    service_result = services.invoke(SERVICE_ID, "get_state", service_parameters)
+    service_result = wirehome.services.invoke(SERVICE_ID, "get_state", service_parameters)
     state = service_result["pin_state"]
 
     is_inverted = config.get("is_inverted", True)
