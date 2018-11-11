@@ -1,6 +1,27 @@
-<div class="pull-right btn-group">
-    <a href="#" class="btn" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
-        ng-click="ctrl.componentService.turnOn(component)">ON</a>
-    <a href="#" class="btn" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
-        ng-click="ctrl.componentService.turnOff(component)">OFF</a>
-</div>
+<style>
+    .brightness-value {
+        font-weight: bold;
+        min-width: 70px;
+    }
+</style>
+
+<form class="form-inline">
+
+    <div class="btn-group pull-right">
+        <button href="#" class="btn" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
+            ng-click="ctrl.componentService.turnOn(component)">ON</button>
+        <button href="#" class="btn" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
+            ng-click="ctrl.componentService.turnOff(component)">OFF</button>
+    </div>
+
+    <div class="form-group pull-right" ng-show="component.getStatus('brightness.value') != null">
+        <div class="input-group">
+            <button href="#" class="btn btn-default" ng-click="ctrl.componentService.decreaseBrightness(component)">&nbsp;<span
+                    class="fas fa-minus"></span>&nbsp;</button>
+            <div class="input-group-addon"><span class="brightness-value">{{component.getStatus('brightness.value') + ' %'}}</span></div>
+            <button href="#" class="btn btn-default" ng-click="ctrl.componentService.increaseBrightness(component)">&nbsp;<span
+                    class="fas fa-plus"></span>&nbsp;</button>
+        </div>
+    </div>
+
+</form>

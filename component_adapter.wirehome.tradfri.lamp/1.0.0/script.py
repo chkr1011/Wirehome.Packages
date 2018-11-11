@@ -1,13 +1,15 @@
-def process_adapter_message(properties):
-    type = properties.get("type", None)
+SERVICE_ID = "service.wirehome.tradfri.gateway_manager"
+
+
+def process_adapter_message(message):
+    type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__()
-    elif type == "turn_on":
-        return __turn_on__()
-    elif type == "turn_off":
-        return __turn_off__()
-
+    if type == "destroy":
+        return __destroy__()
+    if type == "set_state":
+        return __set_state__(message)
     return {
         "type": "exception.not_supported",
         "origin_type": type
@@ -15,64 +17,61 @@ def process_adapter_message(properties):
 
 
 def __initialize__():
-    return __turn_off__()
+    result = {"type": "success"}
+    result["supports_brightness"] = True
+    result["supports_color"] = False
+
+    global subscription_uid
+    subscription_uid = context["component_uid"] + "->tradfri.gateway_manager.event.device_state_changed"
+
+    filter = {
+        "type": "tradfri.gateway_manager.event.device_state_changed"
+    }
+
+    wirehome.message_bus.subscribe(subscription_uid, filter, __gateway_manager_callback__)
+
+    return result
 
 
-def __turn_on__():
-    return __set_state__("on")
+def __destroy__():
+    wirehome.message_bus.unsubscribe(subscription_uid)
 
 
-def __turn_off__():
-    return __set_state__("off")
-
-
-def __set_state__(state):
-    device_id = config.get("device_id", None)
-    if device_id == None:
-        # TODO: lookup device id
-        pass
-
-    uri = "15001/{}".format(device_id)
-
-    if state == "on":
-        payload = "{\"3311\":[{\"5850\":1}]}"
-    elif state == "off":
-        payload = "{\"3311\":[{\"5850\":0}]}"
-
-    return __execute_coap_request__("put", uri, payload)
-
-
-def __execute_coap_request__(method, uri, payload):
-    # TODO: Move to service using the function pool.
-    gateway_address = config.get("gateway_address", None)
-    uri = "coaps://{}:5684/{}".format(gateway_address, uri)
-
-    # Implement a process to get a token and store it (adapter storage etc. Adapter.json)
-    coap_client = config.get("coap_client_filename", "coap-client")
-    client_identity = "Wirehome.Core"
-    psk = config.get("psk")
-
-    escapedPayload = payload.replace('"', '""')
-    arguments = '-c "{} -m {} -u "{}" -k "{}" -e \'{}\' "{}""'.format(
-        coap_client,
-        method,
-        client_identity,
-        psk,
-        escapedPayload,
-        uri)
-
-    log.debug("Tradfri adapter: {}".format(arguments))
-
+def __set_state__(message):
     parameters = {
-        "file_name": "/bin/bash",
-        "arguments": arguments,
-        "timeout": 1000
+        "device_id": config.get("device_id", None),
+        "device_caption": config.get("device_caption", None)
     }
 
-    process_result = os.execute(parameters)
+    if message.get("power_state", None) == "on":
+        parameters["power_state"] = 1
+    else:
+        parameters["power_state"] = 0
 
-    # TODO: Inspect process result.
+    brightness = message.get("brightness", None)
+    if brightness != None:
+        parameters["brightness"] = int((brightness / 100.0) * 245)
 
-    return {
-        "type": "success"
-    }
+    color = message.get("color", None)
+    if color != None:
+        parameters["color"] = color
+
+    return wirehome.services.invoke(SERVICE_ID, "set_device_status", parameters)
+
+
+def __gateway_manager_callback__(message):
+    own_device_id = config.get("device_id", None)
+    message_device_id = message.get("device_id", None)
+
+    if message_device_id != own_device_id:
+        return
+
+    property = message.get("property", None)
+
+    if property == "power_state":
+        new_state = message.get("new_state", None)
+
+        publish_adapter_message({
+            "type": "power_state_changed",
+            "power_state":  new_state
+        })
