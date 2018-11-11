@@ -2,12 +2,15 @@ SERVICE_ID = "service.wirehome.cc_tools.board_manager"
 
 
 def process_adapter_message(message):
-    if message["type"] == "initialize":
-        return __initialize__()
+    type = message.get("type", None)
 
-    return {
-        "type": "not_implemented"
-    }
+    if type == "initialize":
+        return __initialize__()
+    else:
+        return {
+            "type": "exception.not_supported",
+            "origin_type": type
+        }
 
 
 def __initialize__():
@@ -16,8 +19,8 @@ def __initialize__():
         "device_uid": config["device_uid"]
     }
 
-    uid = "wirehome.cc_tools.state_changed:" + scope["component_uid"]
-    message_bus.subscribe(uid, filter, __state_changed_callback__)
+    uid = "wirehome.cc_tools.state_changed:" + context["component_uid"]
+    wirehome.message_bus.subscribe(uid, filter, __state_changed_callback__)
 
     __publish_state__()
 
@@ -48,5 +51,5 @@ def __publish_state__():
     publish_adapter_message(message)
 
 
-def __state_changed_callback__(properties):
+def __state_changed_callback__(message):
     __publish_state__()

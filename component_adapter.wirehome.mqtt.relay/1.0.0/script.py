@@ -4,35 +4,63 @@ def process_adapter_message(message):
     if type == "initialize":
         return __initialize__()
     elif type == "turn_on":
-        return __set_state__("on")
+        return __set_state_internal__("on")
     elif type == "turn_off":
-        return __set_state__("off")
-
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+        return __set_state_internal__("off")
+    elif type == "set_state":
+        return __set_state__(message)
+    else:
+        return {
+            "type": "exception.not_supported",
+            "origin_type": type
+        }
 
 
 def __initialize__():
+    global _subscriptions
+    _subscriptions = []
+
     backward_channel = config.get("backward_channel", None)
     if backward_channel == None:
         return
 
-    component_uid = scope["component_uid"]
+    component_uid = context["component_uid"]
+
     on_topic = backward_channel["on"]["topic"]
-    subscription_uid = "wirehome.mqtt.relay.backward_channel.on:" + component_uid
-    mqtt.subscribe(subscription_uid, on_topic, __handle_backward_channel_message__)
+    subscription_uid = component_uid + "->wirehome.mqtt.relay.backward_channel.on"
+    wirehome.mqtt.subscribe(subscription_uid, on_topic, __handle_backward_channel_message__)
 
     off_topic = backward_channel["off"]["topic"]
     if off_topic != on_topic:
-        subscription_uid = "wirehome.mqtt.relay.backward_channel.off:" + component_uid
-        mqtt.subscribe(subscription_uid, off_topic, __handle_backward_channel_message__)
+        subscription_uid = component_uid + "->wirehome.mqtt.relay.backward_channel.off"
+        wirehome.mqtt.subscribe(subscription_uid, off_topic, __handle_backward_channel_message__)
 
-    return {"type": "success"}
+    return wirehome.response_creator.success()
 
 
-def __set_state__(state):
+def __destroy__():
+    global _subscriptions
+
+    for subscription_uid in _subscriptions:
+        wirehome.mqtt.unsubscribe(subscription_uid)
+
+    _subscriptions = []
+
+    return wirehome.response_creator.success()
+
+
+def __set_state__(message):
+    power_state = message.get("power_state", None)
+    if power_state == None:
+        return {"type", "exception.parameter_missing"}
+
+    if power_state == "on":
+        __set_state_internal__("on")
+    else:
+        __set_state_internal__("off")
+
+
+def __set_state_internal__(state):
     if state == "on":
         message = config.get("on", {})
     else:
@@ -46,9 +74,9 @@ def __set_state__(state):
     server = message.get("server", None)
     if server != None:
         parameters["server"] = server
-        mqtt.publish_external(parameters)
+        wirehome.mqtt.publish_external(parameters)
     else:
-        mqtt.publish(parameters)
+        wirehome.mqtt.publish(parameters)
 
     result = {
         "type": "success"
@@ -84,7 +112,7 @@ def __is_match__(message, filter):
     if topic != filter_topic:
         return False
 
-    payload = convert.to_string(message.get("payload", ""))
-    filter_payload = convert.to_string(filter.get("payload", ""))
+    payload = wirehome.convert.to_string(message.get("payload", ""))
+    filter_payload = wirehome.convert.to_string(filter.get("payload", ""))
 
     return payload == filter_payload
