@@ -35,7 +35,7 @@ def process_adapter_message(message):
 
 def __initialize__(message):
     component.set_status("window.state", "unknown")
-    component.set_configuration("app.view_source", repository.get_file_uri(scope["logic_uid"], "appView.html"))
+    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(scope["logic_uid"], "appView.html"))
 
     return publish_adapter_message({
         "type": "initialize"

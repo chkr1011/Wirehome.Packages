@@ -2,6 +2,7 @@ _power_state = "off"
 _brightness = 100
 _color = "ffffff"
 _supports_brightness = False
+_supports_color = False
 
 
 def process_logic_message(message):
@@ -21,6 +22,8 @@ def process_logic_message(message):
         return __increase_brightness__(message)
     elif type == "decrease_brightness":
         return __decrease_brightness__(message)
+    elif type == "set_color":
+        return __set_color__(message)
     else:
         return {
             "type": "exception.not_supported",
@@ -65,6 +68,11 @@ def __decrease_brightness__(message):
     _brightness -= message.get("value", 5)
     return __set_state__()
 
+def __set_color__(message):
+    global _color
+    _color = message.get("color", "ffffff")
+    return __set_state__()
+
 
 def process_adapter_message(message):
     """
@@ -90,7 +98,7 @@ def process_adapter_message(message):
 
 def __initialize__(message):
     wirehome.component.set_status("power.state", "unknown")
-    wirehome.component.set_configuration("app.view_source", wirehome.repository.get_file_uri(context["logic_uid"], "appView.html"))
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
@@ -99,8 +107,9 @@ def __initialize__(message):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    global _supports_brightness
+    global _supports_brightness, _supports_color
     _supports_brightness = adapter_result.get("supports_brightness", False)
+    _supports_color = adapter_result.get("supports_color", False)
 
     if _supports_brightness:
         wirehome.component.set_status("brightness.value", "unknown")

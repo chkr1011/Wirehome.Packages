@@ -38,7 +38,7 @@ def process_adapter_message(message):
 def __initialize__(message):
     wirehome.component.set_status("motion_detection.state", "unknown")
 
-    app_view_uri = wirehome.repository.get_file_uri(context["logic_uid"], "appView.html")
+    app_view_uri = wirehome.package_manager.get_file_uri(context["logic_uid"], "appView.html")
 
     wirehome.component.set_configuration("app.view_source", app_view_uri)
 

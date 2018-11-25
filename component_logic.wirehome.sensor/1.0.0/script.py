@@ -13,7 +13,7 @@ def process_logic_message(message):
 def __initialize__(message):
     __set_sensor_value__("unknown")
     component.set_status("status.is_outdated", True)
-    component.set_configuration("app.view_source", repository.get_file_uri(scope["logic_uid"], "appView.html"))
+    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(scope["logic_uid"], "appView.html"))
 
     return publish_adapter_message({
         "type": "initialize"
