@@ -3,7 +3,7 @@ import time
 
 
 def initialize():
-    wirehome.debugger.enable()
+    # wirehome.debugger.enable()
     pass
 
 
@@ -120,9 +120,9 @@ def __check_outdoor_temperature_is_low_(command):
 
     # TODO: Use resource service for translation
     if command == "move_down":
-        message = "Skipped closing roller shutters because outdoor temperature is low ({outdoor_temperature})."
+        message = "Skipped closing roller shutters because outdoor temperature is low ({outdoor_temperature} °C)."
     elif command == "move_up":
-        message = "Skipped opening roller shutters because outdoor temperature is low ({outdoor_temperature})."
+        message = "Skipped opening roller shutters because outdoor temperature is low ({outdoor_temperature} °C)."
 
     wirehome.notifications.publish("information", message.format(outdoor_temperature=outdoor_temperature))
 
@@ -138,4 +138,4 @@ def __is_outdoor_temperature_high__():
     if outdoor_temperature == None:
         return False
 
-    return float(max_temperature) > float(outdoor_temperature)
+    return float(outdoor_temperature) > float(max_temperature)
