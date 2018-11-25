@@ -1,7 +1,7 @@
 def main(parameters):
     gateway_address = parameters.get("gateway_address", None)
     security_code = parameters.get("security_code", None)
-    identity = parameters.get("identity", "wirehome.tradfri.gateway_manager")
+    identity = parameters.get("identity", "wirehome")
 
     if gateway_address == None:
         return {
@@ -9,7 +9,11 @@ def main(parameters):
             "parameter_name": "gateway_address"
         }
 
-    # TODO: Validate parameters with new response creator.
+    if security_code == None:
+        return {
+            "type": "exception.parameter_invalid",
+            "parameter_name": "security_code"
+        }
 
     payload = '{{"9090":"{identity}"}}'.format(identity=identity)
 

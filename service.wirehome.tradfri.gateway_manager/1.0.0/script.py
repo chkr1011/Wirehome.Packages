@@ -69,6 +69,7 @@ def set_device_status(status):
 def __poll_status__(_):
     global _gateway_is_connected, _devices
 
+    response = None
     try:
         new_devices = {}
 
@@ -85,7 +86,7 @@ def __poll_status__(_):
         _devices = new_devices
     except:
         _gateway_is_connected = False
-        print("TRADFRI gateway pull failed.")
+        print("TRADFRI gateway pull failed. (Response=" + str(response) + ")")
         sleep(10)
         raise
 
@@ -151,7 +152,7 @@ def __get_device_status_value__(source, device_id, status_id):
 
 def __execute_coap_request__(method, uri, payload=""):
     address = config.get("gateway_address", None)
-    identity = config.get("identity", "wirehome.tradfri.gateway_manager")
+    identity = config.get("identity", "wirehome")
     psk = config.get("psk", None)
 
     uri = "coaps://{a}:5684/{u}".format(a=address, u=uri)
