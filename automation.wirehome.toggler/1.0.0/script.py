@@ -14,18 +14,20 @@ def activate():
             "new_value": "pressed"
         }
 
-        subscription_uid = scope["automation_uid"] + ":status_changed->" + button_uid
-        message_bus.subscribe(subscription_uid, filter, __button_callback__)
+        subscription_uid = context["automation_uid"] + ":status_changed->" + button_uid
+        wirehome.message_bus.subscribe(subscription_uid, filter, __button_callback__)
         subscriptions.append(subscription_uid)
 
 
 def deactivate():
     for subscription_uid in subscriptions:
-        message_bus.unsubscribe(subscription_uid)
+        wirehome.message_bus.unsubscribe(subscription_uid)
+
+    subscriptions.clear()
 
 
 def __button_callback__(message):
     command = {"type": "toggle"}
 
     for target_uid in config["targets"]:
-        component_registry.execute_command(target_uid, command)
+        wirehome.component_registry.execute_command(target_uid, command)
