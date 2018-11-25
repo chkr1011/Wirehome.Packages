@@ -2,13 +2,6 @@ SERVICE_ID = "service.wirehome.cc_tools.board_manager"
 
 
 def process_adapter_message(message):
-    """
-        Processes incoming messages from the component logic.
-
-        Args:
-            properties : {} = The properties of the message.
-    """
-
     type = message.get("type", None)
 
     if type == "initialize":
@@ -20,11 +13,11 @@ def process_adapter_message(message):
     elif type == "set_state":
         id = message["state"]
         return __set_state__(id)
-
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    else:
+        return {
+            "type": "exception.not_supported",
+            "origin_type": type
+        }
 
 
 def __initialize__():
