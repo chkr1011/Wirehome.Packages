@@ -2,7 +2,7 @@
 This automation turns on a component when motion is detected. It also turns it of after the time of `duration` when motion is no longer detected.
 
 # Configuration
-```json
+```json5
 {
     "config":{
         "motion_detectors": ["myDetector1"],
