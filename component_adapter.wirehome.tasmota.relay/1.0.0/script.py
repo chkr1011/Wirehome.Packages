@@ -1,5 +1,8 @@
-def process_adapter_message(properties):
-    type = properties.get("type", None)
+config = {}
+
+
+def process_adapter_message(message):
+    type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__()
@@ -7,11 +10,11 @@ def process_adapter_message(properties):
         return __set_state__("on")
     elif type == "turn_off":
         return __set_state__("off")
-
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    else:
+        return {
+            "type": "exception.not_supported",
+            "origin_type": type
+        }
 
 
 def __initialize__():
@@ -19,17 +22,17 @@ def __initialize__():
     supports_power_consumption = config.get("supports_power_consumption", False)
 
     if supports_power_consumption:
-        subscription_uid = "wirehome.tasmota.relay.ps:" + scope["component_uid"]
+        subscription_uid = "wirehome.tasmota.relay.ps:" + wirehome.context["component_uid"]
 
-        mqtt.subscribe(subscription_uid, "stat/" + device_uid + "/STATUS8", __power_consumption_received__)
+        wirehome.mqtt.subscribe(subscription_uid, "stat/" + device_uid + "/STATUS8", __power_consumption_received__)
 
         update_interval = config.get("power_consumption_update_interval", 5000)
         timer_uid = "wirehome.tasmota.relay.pc.timer." + device_uid
-        scheduler.start_timer(timer_uid, update_interval, __request_power_consumption__)
+        wirehome.scheduler.start_timer(timer_uid, update_interval, __request_power_consumption__)
 
-    subscription_uid = "wirehome.tasmota.relay.stat:" + scope["component_uid"]
+    subscription_uid = "wirehome.tasmota.relay.stat:" + wirehome.context["component_uid"]
     topic = "stat/" + device_uid + "/POWER"
-    mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
+    wirehome.mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
 
     return {"type": "success"}
 
@@ -43,14 +46,14 @@ def __set_state__(state):
         "retain": False
     }
 
-    mqtt.publish(parameters)
+    wirehome.mqtt.publish(parameters)
 
     return {"type": "success"}
 
 
 def __handle_mqtt_message__(properties):
     payload = properties["payload"]
-    payload_string = convert.to_string(payload)
+    payload_string = wirehome.convert.to_string(payload)
 
     type = ""
     if payload_string == "OFF":
@@ -72,15 +75,15 @@ def __request_power_consumption__(parameters):
         "retain": False
     }
 
-    mqtt.publish(parameters)
+    wirehome.mqtt.publish(parameters)
 
 
-def __power_consumption_received__(properties):
-    payload = properties.get("payload", None)
-    json = convert.deserialize_json(payload)
+def __power_consumption_received__(message):
+    payload = message.get("payload", None)
+    json = wirehome.json_serializer.deserialize(payload)
 
     if "StatusSNS" in json:
         if "ENERGY" in json["StatusSNS"]:
             if "Current" in json["StatusSNS"]["ENERGY"]:
                 consumption = json["StatusSNS"]["ENERGY"]["Current"]
-                component.set_status("power.consumption", consumption)
+                wirehome.component.set_status("power.consumption", consumption)
