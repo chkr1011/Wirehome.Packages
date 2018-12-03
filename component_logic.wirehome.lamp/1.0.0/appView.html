@@ -1,20 +1,39 @@
 <style>
     .brightness-value {
         font-weight: bold;
-        min-width: 70px;
-        max-width: 120px;
+        min-width: 90px;
+        max-width: 110px;
     }
 </style>
 
 <div class="input-group pull-right">
-    <button href="#" class="btn" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
-        ng-click="ctrl.componentService.turnOn(component)">ON</button>
-    <button href="#" class="btn" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
-        ng-click="ctrl.componentService.turnOff(component)">OFF</button>
+    <a href="#" class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.turnOn(component)">ON</a>
+    <a href="#" class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
+        ng-click="ctrl.componentService.turnOff(component)">OFF</a>
 </div>
 
+<br/>
+<br/>
+
 <div class="input-group pull-right" ng-show="component.getStatus('brightness.value') != null">
-    <a href="#" class="btn btn-default" ng-click="ctrl.componentService.decreaseBrightness(component)"><span class="fas fa-minus">&nbsp;</span></a>
-    <span class="input-group-addon" style="width:100px;"><span class="brightness-value">{{component.getStatus('brightness.value') + ' %'}}</span></span>
-    <a href="#" class="btn btn-default" ng-click="ctrl.componentService.increaseBrightness(component)"><span class="fas fa-plus">&nbsp;</span></a>
+    <div class="input-group-prepend"></div>
+    <span class="input-group-addon">Brightness: <span class="brightness-value">{{component.getStatus('brightness.value')
+            + ' %'}}</span></span>
+
+    <a href="#" class="btn btn-default btn-outline-secondary" ng-click="ctrl.componentService.decreaseBrightness(component)"><span
+            class="fas fa-minus">&nbsp;</span></a>
+    <a href="#" class="btn btn-default btn-outline-secondary" ng-click="ctrl.componentService.increaseBrightness(component)"><span
+            class="fas fa-plus">&nbsp;</span></a>
 </div>
+
+<!-- <div class="input-group" ng-show="component.getStatus('brightness.value') != null">
+    <div class="input-group-prepend"></div>
+    <span class="input-group-addon">Brightness: <span class="brightness-value">{{component.getStatus('brightness.value')
+            + ' %'}}</span></span>
+
+    <a href="#" class="btn btn-default btn-outline-secondary" ng-click="ctrl.componentService.decreaseBrightness(component)"><span
+            class="fas fa-minus">&nbsp;</span></a>
+    <a href="#" class="btn btn-default btn-outline-secondary" ng-click="ctrl.componentService.increaseBrightness(component)"><span
+            class="fas fa-plus">&nbsp;</span></a>
+</div> -->
