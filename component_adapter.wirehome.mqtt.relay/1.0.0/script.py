@@ -1,3 +1,6 @@
+config = {}
+
+
 def process_adapter_message(message):
     type = message.get("type", None)
 
@@ -24,7 +27,7 @@ def __initialize__():
     if backward_channel == None:
         return
 
-    component_uid = context["component_uid"]
+    component_uid = wirehome.context["component_uid"]
 
     on_topic = backward_channel["on"]["topic"]
     subscription_uid = component_uid + "->wirehome.mqtt.relay.backward_channel.on"
@@ -55,9 +58,9 @@ def __set_state__(message):
         return {"type", "exception.parameter_missing"}
 
     if power_state == "on":
-        __set_state_internal__("on")
+        return __set_state_internal__("on")
     else:
-        __set_state_internal__("off")
+        return __set_state_internal__("off")
 
 
 def __set_state_internal__(state):
