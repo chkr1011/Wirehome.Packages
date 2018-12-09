@@ -1,0 +1,6 @@
+<div class="btn-group pull-right">
+    <button href="#" class="btn" ng-class="component.getStatus('valve.state')==='open' ? 'btn-primary' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'open'})">OPEN</button>
+    <button href="#" class="btn" ng-class="component.getStatus('valve.state')==='closed' ? 'btn-primary' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'close'})">CLOSED</button>
+</div>
