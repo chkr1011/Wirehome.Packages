@@ -1,3 +1,6 @@
+config = {}
+
+
 def process_logic_message(message):
     type = message.get("type", None)
 
@@ -8,7 +11,7 @@ def process_logic_message(message):
     elif type == "turn_on":
         return __set_state__("on")
     elif type == "toggle":
-        if component.get_status("power.state") == "off":
+        if wirehome.component.get_status("power.state") == "off":
             return __set_state__("on")
         else:
             return __set_state__("off")
@@ -26,8 +29,8 @@ def process_adapter_message(message):
 def __initialize__(message):
     # Use a static value for power consumption here if added to the config.
 
-    component.set_status("power.state", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(scope["logic_uid"], "appView.html"))
+    wirehome.component.set_status("power.state", "unknown")
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
@@ -36,7 +39,7 @@ def __initialize__(message):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    initial_state = globals().get("config", {}).get("initial_state", "off")
+    initial_state = config.get("initial_state", "off")
 
     return __set_state__(initial_state)
 
@@ -55,19 +58,19 @@ def __set_state__(state):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
+    static_power_consumption = config.get("static_power_consumption", None)
 
     if state == "on":
-        component.set_status("power.state", "on")
+        wirehome.component.set_status("power.state", "on")
 
         if static_power_consumption != None:
-            component.set_status("power.consumption", static_power_consumption)
+            wirehome.component.set_status("power.consumption", static_power_consumption)
 
     elif state == "off":
-        component.set_status("power.state", "off")
+        wirehome.component.set_status("power.state", "off")
 
         if static_power_consumption != None:
-            component.set_status("power.consumption", 0)
+            wirehome.component.set_status("power.consumption", 0)
 
     return {
         "type": "success"
