@@ -13,6 +13,7 @@ BOARD_HS_PE_8_IN = "HSPE8-IN"
 BOARD_HS_PE_8_OUT = "HSPE8-OUT"
 BOARD_HS_RB_16 = "HSRB16"
 
+config = {}
 
 class Device:
     uid = ""
