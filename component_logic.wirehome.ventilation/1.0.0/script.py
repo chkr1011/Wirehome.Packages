@@ -9,20 +9,20 @@ def process_logic_message(message):
         level = message.get("level", 0)
         return __set_level__(level)
     elif type == "increase_level":
-        current_level = component.get_status("level.current")
+        current_level = wirehome.component.get_status("level.current")
         current_level += 1
 
-        max_level = component.get_configuration("level.max")
+        max_level = wirehome.component.get_configuration("level.max")
         if current_level > max_level:
             current_level = 0
 
         return __set_level__(current_level)
     elif type == "decrease_level":
-        current_level = component.get_status("level.current")
+        current_level = wirehome.component.get_status("level.current")
         current_level -= 1
 
         if current_level < 0:
-            current_level = component.get_configuration("level.max")
+            current_level = wirehome.component.get_configuration("level.max")
 
         return __set_level__(current_level)
 
@@ -39,7 +39,7 @@ def process_adapter_message(message):
 def __initialize__(message):
     component.set_status("level.current", "unknown")
     component.set_configuration("level.max", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(scope["logic_uid"], "appView.html"))
+    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
