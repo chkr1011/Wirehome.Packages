@@ -98,7 +98,7 @@ def process_adapter_message(message):
 
 def __initialize__(message):
     wirehome.component.set_status("power.state", "unknown")
-    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(context["logic_uid"], "appView.html"))
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
