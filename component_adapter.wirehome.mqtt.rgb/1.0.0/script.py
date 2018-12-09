@@ -15,9 +15,11 @@ def process_adapter_message(message):
 
 
 def __initialize__():
-    # TODO: Attach to message bus to wait for device changes?
-    return {"type": "success"}
-
+    return {
+        "type": "success",
+        "supports_brightness": True,
+        "supports_color": True
+    }
 
 def __set_color__(message):
     r = message["r"]
