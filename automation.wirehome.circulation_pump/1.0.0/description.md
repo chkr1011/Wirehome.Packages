@@ -2,6 +2,7 @@
 This automation controls a circulation pump for heating. It supports several types of modes like turning on if someone is present at the affected room or disabling it at a certain time to save energy.
 
 # Configuration
+The configuration of this automation contains the following JSON parameters.
 
 * `duration`: Defines the duration (in seconds) which is required for the water to fully circulate
 * `pause`: Defines the pause (in seconds) for every run. This is the time which is required by the water to cool down.
