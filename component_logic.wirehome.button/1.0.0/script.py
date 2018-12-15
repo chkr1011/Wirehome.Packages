@@ -1,45 +1,67 @@
+config = {}
+
 def process_logic_message(message):
     type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__(message)
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    return wirehome.response_creator.not_supported(type)
 
 
 def process_adapter_message(message):
     type = message.get("type", None)
 
     if type == "state_changed":
-        new_state = message.get("new_state", None)
+        return __on_state_changed__(message)
 
-        if new_state == "pressed":
-            if component.get_setting("is_enabled", True) != False:
-                component.set_status("button.state", "pressed")
-        elif new_state == "released":
-            component.set_status("button.state", "released")
-        else:
-            return {
-                "type": "exception.not_supported",
-                "new_state": new_state
-            }
+    return wirehome.response_creator.not_supported(type)
 
+
+def __on_state_changed__(message):
+    new_state = message.get("new_state", None)
+    countdown_uid = "wirehome.button->triggered_long_event_countdown->" + wirehome.context["component_uid"]
+    long_press_max_duration = config.get("long_press_max_duration", 2500)
+
+    if new_state == "pressed":
+        if wirehome.component.get_setting("is_enabled", True) != False:
+            wirehome.component.set_status("button.state", "pressed")
+            wirehome.scheduler.start_countdown(countdown_uid, long_press_max_duration, __send_triggered_long_event__)
+    elif new_state == "released":
+        wirehome.component.set_status("button.state", "released")
+
+        if wirehome.scheduler.stop_countdown(countdown_uid):
+            __send_triggered_short_event__(None)
+    else:
         return {
-            "type": "success"
+            "type": "exception.not_supported",
+            "new_state": new_state
         }
 
     return {
-        "type": "exception.not_supported",
-        "origin_type": type
+        "type": "success"
     }
 
 
+def __send_triggered_long_event__(_):
+    wirehome.message_bus.publish({
+        "type": "wirehome.button.event.triggered",
+        "component_uid": wirehome.context["component_uid"],
+        "duration": "long"
+    })
+
+
+def __send_triggered_short_event__(_):
+    wirehome.message_bus.publish({
+        "type": "wirehome.button.event.triggered",
+        "component_uid": wirehome.context["component_uid"],
+        "duration": "short"
+    })
+
+
 def __initialize__(message):
-    component.set_status("button.state", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(scope["logic_uid"], "appView.html"))
+    wirehome.component.set_status("button.state", "unknown")
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     return publish_adapter_message({
         "type": "initialize"
