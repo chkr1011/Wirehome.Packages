@@ -58,12 +58,18 @@ def __timer_tick__(_):
 
 
 def __is_sunset_affected__(now):
+    if wirehome.automation.get_setting("close_on_sunset", True) == False:
+        return False
+
     sunset_shift = wirehome.automation.get_setting("sunset_shift", "00:00:00")
     sunset = __parse_time__("outdoor.sunset", sunset_shift)
     return now >= sunset
 
 
 def __is_sunrise_affected__(now):
+    if wirehome.automation.get_setting("open_on_sunrise", True) == False:
+        return False
+
     disabled_before = wirehome.automation.get_setting("disabled_before", None)
     if disabled_before != None:
         disabled_before = datetime.datetime.strptime(disabled_before, '%H:%M').time()
