@@ -1,0 +1,40 @@
+<style>
+    .status-icon {
+        font-size: 18px;
+        margin-top: 7px;
+        margin-right: 10px;
+    }
+
+    .status-icon-ok {
+        color: #5cb85c;
+    }
+
+    .status-icon-warning {
+        color: #f0ad4e;
+    }
+
+    .status-icon-danger {
+        color: #d9534f;
+    }
+
+    .status-icon-default {
+        color: lightgray;
+    }
+</style>
+
+<div>
+    <span class="pull-left">
+        <span class="status-icon fas fa-dot-circle" ng-class="component.getStatus('motion_detection.state')==='detected' ? 'status-icon-danger' : 'status-icon-default'"></span>
+        <span class="status-icon fas fa-recycle" ng-class="component.getSetting('auto_activate.is_enabled')===true ? 'status-icon-ok' : 'status-icon-default'"></span>
+    </span>
+</div>
+
+<div class="input-group pull-right">
+    <a href="#" class="btn action-button" ng-class="component.getSetting('is_enabled', true)===true ? 'btn-success' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'enable'})">
+        ACTIVE
+    </a>
+    <a href="#" class="btn action-button" ng-class="component.getSetting('is_enabled', true)===false ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'disable'})">
+        INACTIVE
+</div>

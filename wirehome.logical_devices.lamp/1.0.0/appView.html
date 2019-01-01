@@ -1,0 +1,55 @@
+<style>
+    .brightness-value {
+        font-weight: bold;
+        min-width: 90px;
+        max-width: 110px;
+    }
+
+    .color-item {
+        min-width: 50px;
+        max-width: 100px;
+    }
+</style>
+
+<div class="input-group pull-right">
+    <a href="#" class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_on'})">ON</a>
+    <a href="#" class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_off'})">OFF</a>
+</div>
+
+<div ng-show="component.getStatus('brightness.value') != null">
+
+    <br />
+    <br />
+
+    <div class="btn-group pull-right">
+        <a href="#" class="btn btn-default">Brightness:</a>
+
+        <a href="#" class="btn" ng-class="component.getStatus('roller_shutter.state')==='moving_up' ? 'btn-danger' : 'btn-default'"
+            ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'increase_brightness','value':5})"><span
+                class="fas fa-arrow-up"></span>
+        </a>
+        <a href="#" class="btn btn-default">
+            <span class="brightness-value">{{component.getStatus('brightness.value') + ' %'}}</span>
+        </a>
+        <a href="#" class="btn btn-default" ng-class="component.getStatus('roller_shutter.state')==='moving_down' ? 'btn-danger' : 'btn-default'"
+            ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'decrease_brightness','value':5})"><span
+                class="fas fa-arrow-down"></span>
+        </a>
+    </div>
+
+</div>
+
+<div ng-show="component.getStatus('color.value') != null">
+
+    <br />
+    <br />
+
+    <div class="btn-group pull-right">
+        <a href="#" class="btn btn-default">Color:</a>
+        <a ng-repeat="color in component.getConfiguration('colors', [])" href="#" class="btn btn-default color-item"
+            ng-style="{'background': color.value}" ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'set_color','color':color.value})">&nbsp;</a>
+    </div>
+
+</div>

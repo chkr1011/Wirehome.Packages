@@ -1,0 +1,37 @@
+﻿<style>
+    .status-icon {
+        font-size: 18px;
+        margin-top: 7px;
+        margin-right: 10px;
+    }
+
+    .status-icon-ok {
+        color: #5cb85c;
+    }
+
+    .status-icon-warning {
+        color: #f0ad4e;
+    }
+
+    .status-icon-danger {
+        color: #d9534f;
+    }
+
+    .status-icon-default {
+        color: lightgray;
+    }
+</style>
+
+<span class="status-icon pull-left fas fa-square-full" ng-class="component.getStatus('roller_shutter.position')===100 ? 'status-icon-ok' : 'status-icon-default'"></span>
+
+<div class="btn-group pull-right">
+    <a href="#" class="btn" ng-class="component.getStatus('roller_shutter.state')==='moving_up' ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'move_up'})"><span class="fas fa-arrow-up"></span>
+    </a>
+    <a href="#" class="btn" ng-class="component.getStatus('roller_shutter.state')==='off' ? 'btn-success' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_off'})"><span class="fas fa-stop"></span>
+    </a>
+    <a href="#" class="btn btn-default" ng-class="component.getStatus('roller_shutter.state')==='moving_down' ? 'btn-danger' : 'btn-default'"
+        ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'move_down'})"><span class="fas fa-arrow-down"></span>
+    </a>
+</div>
