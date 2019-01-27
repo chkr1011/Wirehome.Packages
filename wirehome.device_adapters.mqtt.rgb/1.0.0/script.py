@@ -1,12 +1,13 @@
+config = {}
+
+
 def process_adapter_message(message):
     type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__()
-    elif type == "turn_off":
-        return __turn_off__()
-    elif type == "set_color":
-        return __set_color__(message)
+    elif type == "set_state":
+        return __set_state__(message)
 
     return {
         "type": "exception.not_supported",
@@ -21,36 +22,39 @@ def __initialize__():
         "supports_color": True
     }
 
-def __set_color__(message):
-    r = message["r"]
-    g = message["g"]
-    b = message["b"]
+
+def __set_state__(message):
+    power_state = message.get("power_state", "off")
+    brightness = message.get("brightness", 100)
+    color = message.get("color", "#ffffff")
+
+    if power_state != "on":
+        mqtt_message = config.get("turn_off_message", None)
+        topic = mqtt_message.get("topic", None)
+        payload = mqtt_message.get("payload", None)
+
+        __send_mqtt_message__(topic, payload)
+        return {"type": "success"}
 
     max_pwm_value = config.get("max_pwm_value", 255)
+    mqtt_message = config.get("set_color_message", None)
+    topic = mqtt_message.get("topic", None)
+    payload = mqtt_message.get("payload_template", None)
 
-    set_color_message = config.get("set_color_message", None)
-    topic = set_color_message["topic"]
-    payload = set_color_message.get("payload_template", "")
+    # Convert HEX to RGB
+    hex = color.lstrip("#")
+    r, g, b = tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
+
+    # Apply brightness to RGB
+    r = r * (brightness / 100)
+    g = g * (brightness / 100)
+    b = b * (brightness / 100)
+
     payload = payload.replace("{r}", str(absolute_value(r, max_pwm_value)))
     payload = payload.replace("{g}", str(absolute_value(g, max_pwm_value)))
     payload = payload.replace("{b}", str(absolute_value(b, max_pwm_value)))
 
     return __send_mqtt_message__(topic, payload)
-
-
-def __turn_off__():
-    turn_off_message = config.get("turn_off_message", None)
-    if turn_off_message != None:
-        topic = turn_off_message["topic"]
-        payload = turn_off_message.get("payload", "")
-
-        return __send_mqtt_message__(topic, payload)
-
-    return __set_color__({
-        "r": 0,
-        "g": 0,
-        "b": 0
-    })
 
 
 def __send_mqtt_message__(topic, payload):
@@ -61,7 +65,7 @@ def __send_mqtt_message__(topic, payload):
 
     # Inspect response when RPC is available.
     # Or wait for special message.
-    mqtt.publish(parameters)
+    wirehome.mqtt.publish(parameters)
 
     return {"type": "success"}
 

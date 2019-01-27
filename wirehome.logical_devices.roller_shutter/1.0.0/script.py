@@ -34,11 +34,11 @@ def __initialize__(message):
     global position_tracker_max
     position_tracker_max = globals().get("config", {}).get("max_position", 0)
 
-    component.set_status("roller_shutter.state", "unknown")
-    component.set_status("roller_shutter.position", "unknown")
-    component.set_status("power.state", "unknown")
-    component.set_status("power.consumption", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
+    wirehome.component.set_status("roller_shutter.state", "unknown")
+    wirehome.component.set_status("roller_shutter.position", "unknown")
+    wirehome.component.set_status("power.state", "unknown")
+    wirehome.component.set_status("power.consumption", "unknown")
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
         "type": "initialize"
@@ -50,7 +50,7 @@ def __initialize__(message):
     if position_tracker_max > 0:
         component_uid = wirehome.context["component_uid"]
         timer_uid = "wirehome.logic.roller_shutter.position_tracker:" + component_uid
-        scheduler.attach_to_default_timer(timer_uid, __position_tracker_callback__)
+        wirehome.scheduler.attach_to_default_timer(timer_uid, __position_tracker_callback__)
 
     return __set_state__("turn_off")
 
@@ -72,31 +72,31 @@ def __set_state__(state):
     global current_state
 
     if state == "turn_off":
-        component.set_status("roller_shutter.state", "off")
-        component.set_status("roller_shutter.position", 0)
-        component.set_status("power.state", "off")
+        wirehome.component.set_status("roller_shutter.state", "off")
+        wirehome.component.set_status("roller_shutter.position", 0)
+        wirehome.component.set_status("power.state", "off")
 
         if power_consumption != None:
-            component.set_status("power.consumption", 0)
+            wirehome.component.set_status("power.consumption", 0)
 
         current_state = "off"
 
     if state == "move_up":
-        component.set_status("roller_shutter.state", "moving_up")
-        component.set_status("power.state", "on")
+        wirehome.component.set_status("roller_shutter.state", "moving_up")
+        wirehome.component.set_status("power.state", "on")
 
         if power_consumption != None:
-            component.set_status("power.consumption", power_consumption)
+            wirehome.component.set_status("power.consumption", power_consumption)
 
         start_auto_off_countdown = True
         current_state = "moving_up"
 
     if state == "move_down":
-        component.set_status("roller_shutter.state", "moving_down")
-        component.set_status("power.state", "on")
+        wirehome.component.set_status("roller_shutter.state", "moving_down")
+        wirehome.component.set_status("power.state", "on")
 
         if power_consumption != None:
-            component.set_status("power.consumption", power_consumption)
+            wirehome.component.set_status("power.consumption", power_consumption)
 
         start_auto_off_countdown = True
         current_state = "moving_down"
@@ -106,7 +106,7 @@ def __set_state__(state):
 
     if start_auto_off_countdown == True and auto_off_timeout != None:
         countdown_uid = wirehome.context["component_uid"] + ".auto_off"
-        scheduler.start_countdown(countdown_uid, auto_off_timeout, __auto_off_callback__)
+        wirehome.scheduler.start_countdown(countdown_uid, auto_off_timeout, __auto_off_callback__)
 
     return {"type": "success"}
 
@@ -147,6 +147,6 @@ def __position_tracker_callback__(parameters):
 
     is_closed = current_position > 95
 
-    component.set_status("roller_shutter.position", current_position)
-    component.set_status("roller_shutter.is_closed", is_closed)
+    wirehome.component.set_status("roller_shutter.position", current_position)
+    wirehome.component.set_status("roller_shutter.is_closed", is_closed)
    

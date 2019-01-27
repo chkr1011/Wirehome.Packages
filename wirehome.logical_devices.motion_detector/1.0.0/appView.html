@@ -1,7 +1,6 @@
 <style>
     .status-icon {
         font-size: 18px;
-        margin-top: 7px;
         margin-right: 10px;
     }
 
@@ -20,12 +19,17 @@
     .status-icon-default {
         color: lightgray;
     }
+
+    .last-activity-text {
+        color: lightgray;
+    }
 </style>
 
 <div>
     <span class="pull-left">
         <span class="status-icon fas fa-dot-circle" ng-class="component.getStatus('motion_detection.state')==='detected' ? 'status-icon-danger' : 'status-icon-default'"></span>
         <span class="status-icon fas fa-recycle" ng-class="component.getSetting('auto_activate.is_enabled')===true ? 'status-icon-ok' : 'status-icon-default'"></span>
+        <span class="last-activity-text">{{component.getStatus('motion_detection.last_detection') | date : 'dd.MM HH:mm:ss' }}</span>
     </span>
 </div>
 

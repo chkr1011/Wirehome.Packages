@@ -1,3 +1,8 @@
+import datetime
+
+config = {}
+
+
 def process_logic_message(message):
     type = message.get("type", None)
 
@@ -16,24 +21,27 @@ def process_logic_message(message):
 def process_adapter_message(message):
     type = message.get("type", None)
 
-    if type == "state_changed":
-        new_state = message.get("new_state", None)
+    if type != "state_changed":
+        return wirehome.response_creator.not_supported(type)
 
-        if new_state == "idle":
-            wirehome.component.set_status("motion_detection.state", "idle")
-        elif new_state == "detected":
-            is_enabled = wirehome.component.get_setting("is_enabled", True)
-            if is_enabled:
-                wirehome.component.set_status("motion_detection.state", "detected")
+    new_state = message.get("new_state", None)
 
-        return {
-            "type": "success"
-        }
+    update_last_detection = False
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    if new_state == "idle":
+        wirehome.component.set_status("motion_detection.state", "idle")
+        update_last_detection = True
+    elif new_state == "detected":
+        is_enabled = wirehome.component.get_setting("is_enabled", True)
+        if is_enabled:
+            wirehome.component.set_status("motion_detection.state", "detected")
+            update_last_detection = True
+
+    if update_last_detection:
+        # Also change on _idle_ because detection may have a duration of several minutes.
+        wirehome.component.set_status("motion_detection.last_detection", datetime.datetime.now().isoformat())
+
+    return wirehome.response_creator.success()
 
 
 def __initialize__(message):
@@ -65,9 +73,7 @@ def __disable__():
 
         wirehome.scheduler.start_countdown(auto_activate_countdown_uid, delay * 1000, __auto_activate_callback__)
 
-    return {
-        "type": "success"
-    }
+    return wirehome.response_creator.success()
 
 
 def __enable__():
@@ -75,9 +81,7 @@ def __enable__():
 
     wirehome.component.set_setting("is_enabled", True)
 
-    return {
-        "type": "success"
-    }
+    return wirehome.response_creator.success()
 
 
 def __auto_activate_callback__(_):
