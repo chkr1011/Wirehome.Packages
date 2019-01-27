@@ -1,5 +1,8 @@
 import time
 
+config = {}
+
+
 class Status:
     sunrise = None
     sunset = None
@@ -17,7 +20,13 @@ def start():
     status = Status()
     is_running = True
 
-    scheduler.start_thread("wirehome.open_weather_map_importer.poll_thread", __poll_status__)
+    wirehome.scheduler.start_thread("wirehome.open_weather_map_importer.poll_thread", __poll_status__)
+
+    wirehome.app.register_panel({
+        "uid": "owm_panel",
+        "position_index": 1,
+        "view_source": wirehome.package_manager.get_file_uri(wirehome.context["service_uid"], "appView.html")
+    })
 
 
 def stop():
@@ -53,7 +62,7 @@ def __poll_status__(_):
     }
 
     while is_running == True:
-        http_result = http_client.send(parameters)
+        http_result = wirehome.http_client.send(parameters)
 
         if http_result.get("type", None) == "success" and http_result.get("status_code", -1) == 200:
             try:
@@ -72,22 +81,22 @@ def __poll_status__(_):
                 conditionIcon = "https://openweathermap.org/img/w/" + conditionIcon + ".png"
 
                 if config.get("import_temperature", True) == True:
-                    global_variables.set("outdoor.temperature", status.temperature)
+                    wirehome.global_variables.set("outdoor.temperature", status.temperature)
 
                 if config.get("import_humidity", True) == True:
-                    global_variables.set("outdoor.humidity", status.humidity)
+                    wirehome.global_variables.set("outdoor.humidity", status.humidity)
 
                 if config.get("import_sunrise", True) == True:
-                    global_variables.set("outdoor.sunrise", status.sunrise)
+                    wirehome.global_variables.set("outdoor.sunrise", status.sunrise)
 
                 if config.get("import_sunset", True) == True:
-                    global_variables.set("outdoor.sunset", status.sunset)
+                    wirehome.global_variables.set("outdoor.sunset", status.sunset)
 
-                global_variables.set("outdoor.condition", status.condition)
-                global_variables.set("outdoor.condition.image_url", conditionIcon)
+                wirehome.global_variables.set("outdoor.condition", status.condition)
+                wirehome.global_variables.set("outdoor.condition.image_url", conditionIcon)
 
-                global_variables.set("open_weather_map.condition_code", weather[0]["id"])
+                wirehome.global_variables.set("open_weather_map.condition_code", weather[0]["id"])
             except:
-                log.error("Error while polling Open Weather Map data. " + sys.exc_info()[0])
+                wirehome.log.error("Error while polling Open Weather Map data. " + sys.exc_info()[0])
 
         time.sleep(update_interval)
