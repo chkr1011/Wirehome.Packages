@@ -53,4 +53,4 @@ def __handle_interrupt__(parameters):
         "new_state": button_state
     }
 
-    publish_adapter_message(message)
+    wirehome.publish_adapter_message(message)

@@ -1,5 +1,7 @@
 import datetime
 
+config = {}
+
 
 def process_logic_message(message):
     type = message.get("type", None)

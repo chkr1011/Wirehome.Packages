@@ -1,5 +1,7 @@
 SERVICE_ID = "wirehome.services.cc_tools.board_manager"
 
+config = {}
+
 
 def process_adapter_message(message):
     type = message.get("type", None)
@@ -47,7 +49,7 @@ def __publish_state__():
         "new_state": button_state
     }
 
-    publish_adapter_message(message)
+    wirehome.publish_adapter_message(message)
 
 
 def __state_changed_callback__(properties):

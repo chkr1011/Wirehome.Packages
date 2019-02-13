@@ -54,13 +54,13 @@ def __initialize__(message):
 
     wirehome.component.set_configuration("app.view_source", app_view_uri)
 
-    return publish_adapter_message({
+    return wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
 
 def __destroy__(message):
-    return publish_adapter_message({
+    return wirehome.publish_adapter_message({
         "type": "destroy"
     })
 

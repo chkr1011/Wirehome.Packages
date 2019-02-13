@@ -32,7 +32,7 @@ def __initialize__(message):
     wirehome.component.set_status("power.state", "unknown")
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
@@ -51,7 +51,7 @@ def __set_state__(state):
     elif state == "off":
         type = "turn_off"
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": type
     })
 

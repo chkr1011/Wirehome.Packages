@@ -1,5 +1,7 @@
 SERVICE_ID = "wirehome.services.cc_tools.board_manager"
 
+config = {}
+
 
 def process_adapter_message(message):
     type = message.get("type", None)
@@ -62,9 +64,9 @@ def __set_state__(id):
                 "commit": False
             }
 
-            service_result = services.invoke(SERVICE_ID, "set_state", parameters)
+            service_result = wirehome.services.invoke(SERVICE_ID, "set_state", parameters)
     finally:
-        services.invoke(SERVICE_ID, "commit_device_states")
+        wirehome.services.invoke(SERVICE_ID, "commit_device_states")
 
     # TODO: Inspect service result!
 

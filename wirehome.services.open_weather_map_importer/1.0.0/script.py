@@ -55,6 +55,8 @@ def __poll_status__(_):
 
     uri += "&appid=" + app_id + "&units=metric"
 
+    print(uri)
+
     parameters = {
         "method": "get",
         "uri":  uri,
@@ -66,9 +68,10 @@ def __poll_status__(_):
 
         if http_result.get("type", None) == "success" and http_result.get("status_code", -1) == 200:
             try:
-                main = http_result["content"]["main"]
-                sys = http_result["content"]["sys"]
-                weather = http_result["content"]["weather"]
+                root = http_result["content"]
+                main = root["main"]
+                sys = root["sys"]
+                weather = root["weather"]
 
                 global status
                 status.temperature = main["temp"]
@@ -94,6 +97,9 @@ def __poll_status__(_):
 
                 wirehome.global_variables.set("outdoor.condition", status.condition)
                 wirehome.global_variables.set("outdoor.condition.image_url", conditionIcon)
+
+                forecast_url = "https://openweathermap.org/city/{}".format(root["id"])
+                wirehome.global_variables.set("outdoor.forecast_url", forecast_url)
 
                 wirehome.global_variables.set("open_weather_map.condition_code", weather[0]["id"])
             except:

@@ -103,7 +103,7 @@ def __initialize__(message):
     wirehome.component.set_status("power.state", "unknown")
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
@@ -150,7 +150,7 @@ def __set_state__():
     if _supports_color:
         message["color"] = _color
 
-    adapter_result = publish_adapter_message(message)
+    adapter_result = wirehome.publish_adapter_message(message)
 
     if adapter_result.get("type", None) != "success" and adapter_result.get("type", None) != "exception.not_supported":
         return adapter_result
@@ -160,12 +160,12 @@ def __set_state__():
     static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
 
     if _power_state == "on":
-        publish_adapter_message({"type": "turn_on"})  # Only for backward compatibility.
+        wirehome.publish_adapter_message({"type": "turn_on"})  # Only for backward compatibility.
 
         if static_power_consumption != None:
             wirehome.component.set_status("power.consumption", static_power_consumption)
     elif _power_state == "off":
-        publish_adapter_message({"type": "turn_off"})  # Only for backward compatibility.
+        wirehome.publish_adapter_message({"type": "turn_off"})  # Only for backward compatibility.
 
         if static_power_consumption != None:
             wirehome.component.set_status("power.consumption", 0)

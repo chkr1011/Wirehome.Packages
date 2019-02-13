@@ -56,7 +56,7 @@ def __initialize__(message):
 
 
 def __set_state__(state):
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": state
     })
 

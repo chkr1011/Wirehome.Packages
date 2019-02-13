@@ -1,3 +1,6 @@
+config = {}
+
+
 def process_adapter_message(message):
     type = message.get("type", None)
 

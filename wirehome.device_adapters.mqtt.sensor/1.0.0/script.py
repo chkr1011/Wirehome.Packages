@@ -1,3 +1,6 @@
+config = {}
+
+
 def process_adapter_message(properties):
     type = properties.get("type", None)
 
@@ -13,12 +16,12 @@ def process_adapter_message(properties):
 def __initialize__():
     subscription_uid = "wirehome.mqtt.sensor:" + wirehome.context["component_uid"]
     topic = config["topic"]
-    mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
+    wirehome.mqtt.subscribe(subscription_uid, topic, __handle_mqtt_message__)
 
 
 def __handle_mqtt_message__(properties):
     payload = properties["payload"]
-    payload_string = convert.to_string(payload)
+    payload_string = wirehome.convert.to_string(payload)
 
     properties = {
         "type": "value_updated",
@@ -26,4 +29,4 @@ def __handle_mqtt_message__(properties):
         "value_type": "string"
     }
 
-    publish_adapter_message(properties)
+    wirehome.publish_adapter_message(properties)

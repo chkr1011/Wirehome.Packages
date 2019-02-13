@@ -17,11 +17,11 @@ def process_adapter_message(message):
         new_state = message.get("new_state", None)
 
         if new_state == "open":
-            component.set_status("window.state", "open")
+            wirehome.component.set_status("window.state", "open")
         elif new_state == "closed":
-            component.set_status("window.state", "closed")
+            wirehome.component.set_status("window.state", "closed")
         elif new_state == "tilt":
-            component.set_status("window.state", "detected")
+            wirehome.component.set_status("window.state", "detected")
 
         return {
             "type": "success"
@@ -34,9 +34,9 @@ def process_adapter_message(message):
 
 
 def __initialize__(message):
-    component.set_status("window.state", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
+    wirehome.component.set_status("window.state", "unknown")
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    return publish_adapter_message({
+    return wirehome.publish_adapter_message({
         "type": "initialize"
     })

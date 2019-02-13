@@ -26,7 +26,7 @@ def __initialize__(message):
     wirehome.component.set_status("valve.state", "unknown")
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
@@ -43,7 +43,7 @@ def __set_state__(state):
         "state": state
     }
 
-    adapter_result = publish_adapter_message(message)
+    adapter_result = wirehome.publish_adapter_message(message)
 
     if adapter_result.get("type", None) != "success":
         return adapter_result

@@ -97,12 +97,12 @@ def __handle_backward_channel_message__(message):
         return
 
     if __is_match__(message, backward_channel.get("on")):
-        publish_adapter_message({
+        wirehome.publish_adapter_message({
             "type": "power_state_changed",
             "power_state": "on"
         })
     elif __is_match__(message, backward_channel.get("off")):
-        publish_adapter_message({
+        wirehome.publish_adapter_message({
             "type": "power_state_changed",
             "power_state": "off"
         })

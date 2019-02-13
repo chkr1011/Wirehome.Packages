@@ -73,7 +73,7 @@ def __gateway_manager_callback__(message):
     if property == "power_state":
         new_state = message.get("new_state", None)
 
-        publish_adapter_message({
+        wirehome.publish_adapter_message({
             "type": "power_state_changed",
             "power_state":  new_state
         })

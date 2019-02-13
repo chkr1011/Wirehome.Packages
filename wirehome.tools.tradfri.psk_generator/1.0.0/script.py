@@ -28,7 +28,7 @@ def main(parameters):
             "message": "The specified identity is already used. Please use a new one."
         }
 
-    json = json_serializer.deserialize_json(gateway_result)
+    json = wirehome.json_serializer.deserialize_json(gateway_result)
 
     psk = json.get("9091", None)
     version = json.get("9029", None)
@@ -60,7 +60,7 @@ def __execute_coap_request__(address, method, uri, payload, identity, psk):
         "timeout": 1000
     }
 
-    execute_result = os.execute(parameters)
+    execute_result = wirehome.os.execute(parameters)
     execute_result["arguments"] = arguments
 
     return execute_result

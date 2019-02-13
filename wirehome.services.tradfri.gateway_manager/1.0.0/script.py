@@ -1,5 +1,6 @@
 TIMER_ID = "wirehome.tradfri.gateway_manager.poll_thread"
 
+config = {}
 
 from time import sleep
 import sys

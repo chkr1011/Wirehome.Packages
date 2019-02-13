@@ -68,7 +68,7 @@ def __initialize__(message):
     wirehome.component.set_status("button.state", "unknown")
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    return publish_adapter_message({
+    return wirehome.publish_adapter_message({
         "type": "initialize"
     })
 

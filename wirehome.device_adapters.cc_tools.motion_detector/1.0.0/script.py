@@ -50,7 +50,7 @@ def __publish_state__():
         "new_state": motion_detection_state
     }
 
-    publish_adapter_message(message)
+    wirehome.publish_adapter_message(message)
 
 
 def __state_changed_callback__(message):

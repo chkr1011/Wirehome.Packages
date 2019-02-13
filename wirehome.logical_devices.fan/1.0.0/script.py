@@ -37,11 +37,11 @@ def process_adapter_message(message):
 
 
 def __initialize__(message):
-    component.set_status("level.current", "unknown")
-    component.set_configuration("level.max", "unknown")
-    component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
+    wirehome.component.set_status("level.current", "unknown")
+    wirehome.component.set_configuration("level.max", "unknown")
+    wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
@@ -49,12 +49,12 @@ def __initialize__(message):
         return adapter_result
 
     max_level = adapter_result.get("level.max", 0)  # Use max_level
-    component.set_configuration("level.max", max_level)
+    wirehome.component.set_configuration("level.max", max_level)
     return __set_level__(0)
 
 
 def __set_level__(level):
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "set_level",
         "level": level
     })
@@ -62,7 +62,7 @@ def __set_level__(level):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    component.set_status("level.current", level)
+    wirehome.component.set_status("level.current", level)
 
     return {
         "type": "success"

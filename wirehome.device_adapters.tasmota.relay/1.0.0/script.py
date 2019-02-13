@@ -63,7 +63,7 @@ def __handle_mqtt_message__(properties):
 
     properties = {"type": type}
 
-    publish_adapter_message(properties)
+    wirehome.publish_adapter_message(properties)
 
 
 def __request_power_consumption__(parameters):

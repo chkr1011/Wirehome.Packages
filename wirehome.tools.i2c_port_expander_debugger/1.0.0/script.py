@@ -7,13 +7,13 @@ def main(parameters):
     registers = []
 
     if ic == "PCF8574" or ic == "PCF8574A":
-        state = list(i2c.read(bus_id, address, 1))
+        state = list(wirehome.i2c.read(bus_id, address, 1))
 
         registers.append({
             "state_array": state,
-            "state_ulong": convert.list_to_ulong(state),
-            "state_hex": convert.list_to_hex_string(state),
-            "state_bits": convert.list_to_bit_string(state),
+            "state_ulong": wirehome.convert.list_to_ulong(state),
+            "state_hex": wirehome.convert.list_to_hex_string(state),
+            "state_bits": wirehome.convert.list_to_bit_string(state),
         })
 
     elif ic == "MAX7311" or ic == "PCA9555":
@@ -25,8 +25,8 @@ def main(parameters):
             registers.append({
                 "offset": offset,
                 "state_byte": register,
-                "state_hex": convert.list_to_hex_string([register]),
-                "state_bits": convert.list_to_bit_string([register]),
+                "state_hex": wirehome.convert.list_to_hex_string([register]),
+                "state_bits": wirehome.convert.list_to_bit_string([register]),
             })
 
             offset += 1

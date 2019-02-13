@@ -1,5 +1,7 @@
 SERVICE_ID = "wirehome.services.cc_tools.board_manager"
 
+config = {}
+
 
 def process_adapter_message(properties):
     """
@@ -39,11 +41,11 @@ def __set__state__(uid):
                 "commit": False
             }
 
-            service_result = services.invoke(SERVICE_ID, "set_state", parameters)
+            service_result = wirehome.services.invoke(SERVICE_ID, "set_state", parameters)
 
             # TODO: Inspect service result.
 
-        return services.invoke(SERVICE_ID, "commit_device_states")
+        return wirehome.services.invoke(SERVICE_ID, "commit_device_states")
     except Exception as ex:
         print(ex)
         return {

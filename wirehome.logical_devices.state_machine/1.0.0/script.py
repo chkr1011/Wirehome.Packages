@@ -26,7 +26,7 @@ def __initialize__(message):
     wirehome.component.set_configuration("state_machine.states", "unknown")
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "initialize"
     })
 
@@ -42,7 +42,7 @@ def __initialize__(message):
 
 
 def __set_state__(state):
-    adapter_result = publish_adapter_message({
+    adapter_result = wirehome.publish_adapter_message({
         "type": "set_state",
         "state": state
     })

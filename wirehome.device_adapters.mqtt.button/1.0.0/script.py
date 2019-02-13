@@ -30,7 +30,7 @@ def __handle_mqtt_message__(mqtt_message):
         "new_state": __transform_state__(payload)
     }
 
-    publish_adapter_message(message)
+    wirehome.publish_adapter_message(message)
 
 
 def __transform_state__(payload):

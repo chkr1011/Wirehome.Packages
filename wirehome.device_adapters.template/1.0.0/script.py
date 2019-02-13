@@ -55,7 +55,7 @@ def on_temperature_update():
         "value": temp_from_sensor
     }
 
-    publish_adapter_message(message)
+    wirehome.publish_adapter_message(message)
 
 
 """
