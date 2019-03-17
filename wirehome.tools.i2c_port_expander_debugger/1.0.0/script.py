@@ -18,7 +18,7 @@ def main(parameters):
 
     elif ic == "MAX7311" or ic == "PCA9555":
         write_buffer = [0]
-        state = list(i2c.write_read(bus_id, address, write_buffer, 9))
+        state = list(wirehome.i2c.write_read(bus_id, address, write_buffer, 9))
 
         offset = 0
         for register in state:
