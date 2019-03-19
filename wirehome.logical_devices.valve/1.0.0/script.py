@@ -48,19 +48,15 @@ def __set_state__(state):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    static_power_consumption = config.get("static_power_consumption", None)
-
+    static_power_consumption = config.get("static_power_consumption", {})
+    
     if state == "open":
         wirehome.component.set_status("valve.state", "open")
-
-        if static_power_consumption != None:
-            wirehome.component.set_status("power.consumption", 0)
+        wirehome.component.set_status("power.consumption", static_power_consumption.get("open", 0))
 
     elif state == "closed":
         wirehome.component.set_status("valve.state", "closed")
-
-        if static_power_consumption != None:
-            wirehome.component.set_status("power.consumption", static_power_consumption)
+        wirehome.component.set_status("power.consumption", static_power_consumption.get("closed", 0))
 
     return {
         "type": "success"
