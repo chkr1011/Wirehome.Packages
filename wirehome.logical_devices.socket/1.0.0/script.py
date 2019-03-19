@@ -40,7 +40,6 @@ def __initialize__(message):
         return adapter_result
 
     initial_state = config.get("initial_state", "off")
-
     return __set_state__(initial_state)
 
 
