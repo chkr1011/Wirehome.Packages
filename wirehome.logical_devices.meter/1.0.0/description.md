@@ -3,3 +3,5 @@ This logical device represents a metering device. It can be used for metering of
 
 1. Wh
 2. m³
+
+# Configuration

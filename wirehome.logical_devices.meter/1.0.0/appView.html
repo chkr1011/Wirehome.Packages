@@ -4,8 +4,35 @@
         font-size: 16px;
         float: right;
     }
+
+    .status-icon {
+        font-size: 18px;
+        margin-right: 10px;
+    }
+
+    .status-icon-warning {
+        color: #f0ad4e;
+    }
+
+    .status-icon-default {
+        color: lightgray;
+    }
+
+    .last-activity-text {
+        color: lightgray;
+    }
 </style>
 
 <div>
-    <span class="meter-value">{{component.getStatus('meter.value') + ' ' + component.getConfiguration("unit", "?")}}</span>
+    <span class="pull-left">
+        <span class="status-icon fas fa-burn"
+            ng-class="component.getStatus('meter.is_active')===true ? 'status-icon-warning' : 'status-icon-default'"></span>
+        <span
+            class="last-activity-text">{{component.getStatus('meter.last_activity') | date : 'dd.MM HH:mm:ss' }}</span>
+    </span>
+</div>
+
+<div>
+    <span
+        class="meter-value">{{component.getStatus('meter.value') + ' ' + component.getConfiguration("unit", "?")}}</span>
 </div>
