@@ -1,5 +1,6 @@
 # Summary
-Connects to the XML-RPC endpoint of Homematic CCU and allows access to the device states.
+Connects to the XML-RPC endpoint of a Homematic CCU and allows access to the device states.  
+Offers an XML-RPC server to receive events from the CCU.
 
 # Installation
 - enable XML-RPC in the CCU Firewall configuration.
@@ -7,7 +8,9 @@ Connects to the XML-RPC endpoint of Homematic CCU and allows access to the devic
 # Configuration
 ```
 {
-    "ip": "[IP of the CCU]",
-    "port": "[PORT of the XML-RPC server]" // 2010 for Homematic IP devices, 2001 for BidCos-RF, 2000 for BidCos-Wired`
+    "ccu_ip": "[IP of the CCU]",
+    "ccu_port": "[PORT of the CCU's XML-RPC server]", // 2010 for Homematic IP devices, 2001 for BidCos-RF, 2000 for BidCos-Wired`
+    "rpc_ip": "[IP of the Wirehome host]",
+    "rpc_port": "[PORT of Wirehome's XML-RPC Server]" // choose one
 }
 ```
