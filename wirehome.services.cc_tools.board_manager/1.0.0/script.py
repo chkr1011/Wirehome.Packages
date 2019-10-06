@@ -139,7 +139,7 @@ def set_state(parameters):
 
 def get_state(parameters):
     # Lookup the device.
-    device_uid = parameters["device_uid"]  
+    device_uid = parameters["device_uid"]
     device = __get_device__(device_uid)
     if device == None:
         return {
