@@ -84,7 +84,12 @@ function createAppController($http, $scope, apiService, localizationService, com
                 $.each(componentGroup.components, function (i) {
                     var componentModel = {
                         uid: i,
-                        source: {}
+                        source: {},
+                        showMore: false
+                    };
+
+                    componentModel.toggleShowMore = function() {
+                        componentModel.showMore = !componentModel.showMore;
                     };
 
                     componentModel.hasStatus = function (uid) {
@@ -201,6 +206,10 @@ function createAppController($http, $scope, apiService, localizationService, com
 
         model.sortValue = getValue(source.settings, "app.position_index", model.uid);
 
+        // Sort the components by its sort value. Do not use sorting in Angular because the
+        // actual is required for other code.
+        model.components.sort(function(x, y) { return x.sortValue - y.sortValue; });
+
         $.each(model.components,
             function (i, componentModel) {
                 var componentStatus = status.components.find(x => x.uid === componentModel.uid);
@@ -212,6 +221,35 @@ function createAppController($http, $scope, apiService, localizationService, com
             });
     };
 
+    c.moveComponent = function(component, componentGroup, direction){
+
+        var itemIndex = componentGroup.components.indexOf(component);
+
+        if (direction == "down")
+        {
+            if (itemIndex == componentGroup.components.length - 1)
+            {
+                return;
+            }
+
+            [componentGroup.components[itemIndex], componentGroup.components[itemIndex + 1]] = [componentGroup.components[itemIndex + 1], componentGroup.components[itemIndex]];
+        }
+        else if (direction == "up")
+        {
+            if (itemIndex == 0)
+            {
+                return;
+            }
+
+            [componentGroup.components[itemIndex], componentGroup.components[itemIndex - 1]] = [componentGroup.components[itemIndex - 1], componentGroup.components[itemIndex]];
+        }
+        
+        $.each(componentGroup.components,
+            function (i, component) {
+                c.componentService.setPositionIndex(component.uid, componentGroup.uid, i);
+            });
+    };
+    
     $http.get("version.txt").then(function (response) {
         c.version = response.data;
     });

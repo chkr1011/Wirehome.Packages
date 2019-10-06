@@ -49,9 +49,17 @@ body {
 
 /* Custom styles */
 
+.button-icon {
+    margin-right: 5px;
+}
+
 .no-component-view-found {
     font-size: 12pt;
     text-align: center;
+}
+
+.component-status-action {
+    cursor: pointer;
 }
 
 .component-status-text {
@@ -68,6 +76,13 @@ body {
     margin-top: 7px;
 }
 
+.show-more-button {
+    color: gainsboro;
+    margin-left: 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
 .slider-legend {
     height: 16px;
     width: 100%;
@@ -79,8 +94,8 @@ body {
 }
 
 .component-icon {
-    font-size: 20px;
     margin-right: 10px;
+    font-size: 1.5em;
 }
 
 .component-group-icon {
@@ -91,6 +106,7 @@ body {
 }
 
 .component-caption {
+    font-size: 1.2em;
     vertical-align: text-bottom;
 }
 

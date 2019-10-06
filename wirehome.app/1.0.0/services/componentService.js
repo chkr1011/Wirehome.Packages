@@ -23,5 +23,37 @@
             });
     };
 
+    srv.enable = function (componentUid) {
+        apiService.executePost(
+            "/api/v1/components/" + componentUid + "/enable",
+            null,
+            function (response) {
+            });
+    };
+
+    srv.disable = function (componentUid) {
+        apiService.executePost(
+            "/api/v1/components/" + componentUid + "/disable",
+            null,
+            function (response) {
+            });
+    };
+
+    srv.initialize = function (componentUid) {
+        apiService.executePost(
+            "/api/v1/components/" + componentUid + "/initialize",
+            null,
+            function (response) {
+            });
+    };
+
+    srv.setPositionIndex = function (componentUid, componentGroupUid, value) {
+        apiService.executePost(
+            "/api/v1/component_groups/" + componentGroupUid + "/components/" + componentUid + "/settings/app.position_index",
+            value,
+            function (response) {
+            });
+    };
+
     return this;
 }
