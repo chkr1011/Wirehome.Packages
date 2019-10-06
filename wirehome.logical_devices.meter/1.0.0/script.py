@@ -27,7 +27,7 @@ def process_adapter_message(message):
 
         elif key == "activity":
             value = message.get("value", None)
-            value = value in ["True", "true", "1", True]
+            value = value in ["True", "true", "1", 1, True]
 
             wirehome.component.set_status("meter.is_active", value)
 
