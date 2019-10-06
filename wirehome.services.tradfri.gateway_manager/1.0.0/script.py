@@ -1,4 +1,4 @@
-TIMER_ID = "wirehome.tradfri.gateway_manager.poll_thread"
+TIMER_ID = "wirehome.tradfri.gateway_manager.polling"
 
 config = {}
 
@@ -89,7 +89,6 @@ def __poll_status__(_):
         _gateway_is_connected = False
         print("TRADFRI gateway pull failed. (Response=" + str(response) + ")")
         sleep(10)
-        raise
 
 
 def __fire_events__(old, new):
