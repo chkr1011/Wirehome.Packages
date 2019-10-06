@@ -11,11 +11,9 @@ def process_logic_message(message):
     elif type == "close":
         return __set_state__("closed")
     elif type == "set_state":
-        return __set_state__(message["state"])
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+        return __set_state__(message.get("state", None))
+    else:
+        return wirehome.response_creator.not_supported(type)
 
 
 def process_adapter_message(message):
@@ -31,16 +29,27 @@ def __initialize__(message):
     })
 
     if adapter_result.get("type", None) != "success":
+        wirehome.log.warning("Initialization of valve '{componentUid}' failed (Adapter result = {result}).".format(componentUid = wirehome.context["component_uid"], result = str(adapter_result)))
         return adapter_result
 
-    initial_state = config.get("initial_state", "open")
+    initial_state = config.get("initial_state", "closed")
     return __set_state__(initial_state)
 
 
 def __set_state__(state):
+    valve_is_inverted = config.get("is_inverted", True),  # The most valves for heating are open of power is lost.
+
+    effective_state = state
+
+    if valve_is_inverted:
+        if effective_state == "open":
+            effective_state = "closed"
+        else:
+            effective_state = "open"
+
     message = {
         "type": "set_state",
-        "state": state
+        "state": effective_state
     }
 
     adapter_result = wirehome.publish_adapter_message(message)
@@ -49,7 +58,7 @@ def __set_state__(state):
         return adapter_result
 
     static_power_consumption = config.get("static_power_consumption", {})
-    
+
     if state == "open":
         wirehome.component.set_status("valve.state", "open")
         wirehome.component.set_status("power.consumption", static_power_consumption.get("open", 0))

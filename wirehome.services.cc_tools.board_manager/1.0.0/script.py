@@ -88,6 +88,7 @@ def stop():
 def commit_device_states():
     for device in output_devices:
         __write__state__(device)
+        __update_shared_relays__(device)
 
     return {"type": "success"}
 
@@ -98,6 +99,7 @@ def set_state(parameters):
     state = parameters["state"]
     commit = parameters.get("commit", True)
     is_inverted = parameters.get("is_inverted", False)
+    update_shared_relays = parameters.get("update_shared_relays", True)
 
     if is_inverted == True:
         if state == "closed":
@@ -125,6 +127,9 @@ def set_state(parameters):
 
     if commit:
         __write__state__(device)
+
+        if update_shared_relays:
+            __update_shared_relays__(device)
 
     return {
         "type": "success",
@@ -190,8 +195,6 @@ def __write__state__(device):
     elif device.board == BOARD_HS_RB_16:
         __write_max7311__(device)
 
-    # __update_shared_relays__()
-
 
 def __write_pcf8574__(device):
     wirehome.i2c.write_as_ulong(device.bus_id, device.address, device.buffer, 1)
@@ -212,27 +215,61 @@ def __write_max7311__(device):
     wirehome.i2c.write_as_ulong(device.bus_id, device.address, buffer, 3)
 
 
-def __update_shared_relays__():
+def __update_shared_relays__(changed_device):
     for shared_relay in config.get("shared_relays", []):
-        shared_relay_state = "open"
+        __update_shared_relay__(changed_device, shared_relay)
 
-        for related_relay in shared_relay.get("related_relays", []):
-            related_relay_state = get_state({
-                "device_uid": related_relay["device_uid"],
-                "port": related_relay["port"],
-                "is_inverted": related_relay.get("is_inverted", False)
-            })
 
-            if related_relay_state.get("relay_state", None) == "closed":
-                shared_relay_state = "closed"
-                break
+def __update_shared_relay__(changed_device, shared_relay):
+    shared_relay_device_uid = shared_relay["device_uid"]
+    shared_relay_port = shared_relay["port"]
+    shared_relay_is_inverted = shared_relay.get("is_inverted", False)
 
-        set_state({
-            "device_uid": shared_relay["device_uid"],
-            "port": shared_relay["port"],
-            "is_inverted": shared_relay.get("is_inverted", False),
-            "state": shared_relay_state
+    # Only shared relays at the same physical board are supported.
+    # So we can skip if we have a different board.
+    if shared_relay_device_uid != changed_device.uid:
+        return
+
+    # First get the required state of the shared relay.
+    # When any of the related relays is closed, the shared must be also closed.
+    # In all other cases the shared relay remains open.
+    new_shared_relay_state = "open"
+
+    for related_relay in shared_relay.get("related_relays", []):
+        related_relay_state = get_state({
+            "device_uid": related_relay["device_uid"],
+            "port": related_relay["port"],
+            "is_inverted": related_relay.get("is_inverted", False)
         })
+
+        if related_relay_state.get("relay_state", None) == "closed":
+            new_shared_relay_state = "closed"
+            break
+
+    # Check if the state of the shared relay must be changed. Skip update if the
+    # state is already the required one.
+    shared_relay_state = get_state({
+        "device_uid": shared_relay_device_uid,
+        "port": shared_relay_port,
+        "is_inverted": shared_relay_is_inverted
+    })
+
+    if shared_relay_state.get("relay_state", None) == new_shared_relay_state:
+        return
+
+    print("Updating shared relay state {x} to {y}.".format(x=shared_relay_state.get("relay_state", "bla"), y=new_shared_relay_state))
+    print(shared_relay_state)
+
+    set_state({
+        "device_uid": shared_relay_device_uid,
+        "port": shared_relay_port,
+        "is_inverted": shared_relay_is_inverted,
+        "update_shared_relays": False,  # Prevent stack overflow.
+        "state": new_shared_relay_state
+    })
+
+    # else:
+    #print("Shared relay state has not changed ({x}).".format(x = new_shared_relay_state))
 
 
 def __transform_port_state__(port, port_state, board):
@@ -318,9 +355,9 @@ def __initialize_device__(device_uid, config):
                 device.board == BOARD_HS_RB_16):
             output_devices.append(device)
 
-        print("Initialized device " + device.uid)
-    except:
-        print("Initializing device " + device.uid + " failed.")
+        wirehome.log.information("Initialized device " + device.uid)
+    except Exception as ex:
+        wirehome.log.error("Initializing device " + device.uid + " failed. " + ex.message + " (" + str(type(ex)) + ").")
 
 
 def __initialize_input_hspe16__(device):

@@ -19,10 +19,7 @@ def process_adapter_message(message):
     elif type == "set_state":
         return __set_state__(message)
     else:
-        return {
-            "type": "exception.not_supported",
-            "origin_type": type
-        }
+        return wirehome.response_creator.not_supported(type)
 
 
 def __initialize__():

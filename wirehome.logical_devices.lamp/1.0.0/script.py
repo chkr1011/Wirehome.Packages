@@ -108,6 +108,7 @@ def __initialize__(message):
     })
 
     if adapter_result.get("type", None) != "success":
+        wirehome.log.warning("Initialization of lamp '{componentUid}' failed (Adapter result = {result}).".format(componentUid = wirehome.context["component_uid"], result = str(adapter_result)))
         return adapter_result
 
     global _supports_brightness, _supports_color
