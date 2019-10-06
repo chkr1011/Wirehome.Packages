@@ -38,6 +38,7 @@ def main(parameters):
 
     return {
         "type": "success",
+        "identity": identity,
         "psk": psk,
         "version": version
     }
