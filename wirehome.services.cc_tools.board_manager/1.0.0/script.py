@@ -138,10 +138,8 @@ def set_state(parameters):
 
 
 def get_state(parameters):
-    device_uid = parameters["device_uid"]
-    port = parameters["port"]
-    is_inverted = parameters.get("is_inverted", False)
-
+    # Lookup the device.
+    device_uid = parameters["device_uid"]  
     device = __get_device__(device_uid)
     if device == None:
         return {
@@ -149,15 +147,29 @@ def get_state(parameters):
             "device_uid": device_uid
         }
 
-    state = (device.buffer & (0x1 << port)) > 0
+    # Get the actual bit state from the port expander.
+    port = parameters["port"]
+    bitState = (device.buffer & (0x1 << port)) > 0
 
+    # Compute the different state kinds.
     pin_state = "low"
     relay_state = "open"
 
-    if state == True:
+    if bitState == True:
         pin_state = "high"
         relay_state = "closed"
 
+    # The port expander of the HS REL 5 is inverted by hardware inverters!
+    if device.board == BOARD_HS_REL_5:
+        if port >= 0 and port <= 4:
+            if pin_state == "high":
+                relay_state = "open"
+            elif pin_state == "low":
+                relay_state = "closed"
+
+    # Manually invert the relay state because the power might be forwarded
+    # only if the relay is opened (save power when most of the time on).
+    is_inverted = parameters.get("is_inverted", False)
     if is_inverted == True:
         if relay_state == "closed":
             relay_state = "open"
@@ -169,17 +181,11 @@ def get_state(parameters):
         elif pin_state == "low":
             pin_state = "high"
 
-    if device.board == BOARD_HS_REL_5:
-        if port >= 0 and port <= 4:
-            if state == "high":
-                relay_state = "open"
-            elif state == "low":
-                relay_state = "closed"
-
     return {
         "type": "success",
         "pin_state": pin_state,
-        "relay_state": relay_state
+        "relay_state": relay_state,
+        "is_inverted": is_inverted
     }
 
 
@@ -257,7 +263,7 @@ def __update_shared_relay__(changed_device, shared_relay):
     if shared_relay_state.get("relay_state", None) == new_shared_relay_state:
         return
 
-    print("Updating shared relay state {x} to {y}.".format(x=shared_relay_state.get("relay_state", "bla"), y=new_shared_relay_state))
+    print("Updating shared relay state {x} to {y}.".format(x=shared_relay_state.get("relay_state", ""), y=new_shared_relay_state))
     print(shared_relay_state)
 
     set_state({
@@ -267,9 +273,6 @@ def __update_shared_relay__(changed_device, shared_relay):
         "update_shared_relays": False,  # Prevent stack overflow.
         "state": new_shared_relay_state
     })
-
-    # else:
-    #print("Shared relay state has not changed ({x}).".format(x = new_shared_relay_state))
 
 
 def __transform_port_state__(port, port_state, board):
