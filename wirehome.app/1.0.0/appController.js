@@ -48,12 +48,6 @@ function createAppController($http, $scope, apiService, localizationService, com
                             c.configureComponent(componentModel, updatedComponent, componentGroupModel);
                         }
                     });
-
-                // $.each(componentGroupModel.macros, function (j, marcoModel) {
-                //     if (marcoModel.uid == updatedMacro.uid) {
-                //         c.configureMacro(marcoModel, updatedMacro, componentGroupModel)
-                //     }
-                // });
             });
     };
 
@@ -69,6 +63,7 @@ function createAppController($http, $scope, apiService, localizationService, com
 
                 var componentGroupModel = {
                     uid: componentGroup.uid,
+                    hash: 0,
                     source: {},
                     settings: {},
                     components: [],
@@ -84,6 +79,7 @@ function createAppController($http, $scope, apiService, localizationService, com
                 $.each(componentGroup.components, function (i) {
                     var componentModel = {
                         uid: i,
+                        hash: 0,
                         source: {},
                         status: {},
                         settings: {},
@@ -208,6 +204,12 @@ function createAppController($http, $scope, apiService, localizationService, com
     };
 
     c.configureComponent = function (model, source, componentGroupModel) {
+        if (model.hash > source.hash) {
+            // The received data is older than the current model.
+            console.log("Skipped update of component '" + model.uid + "' due to older hash.")
+            return;
+        }
+
         model.source = source;
 
         importChanges(model.settings, source.settings);
@@ -300,11 +302,11 @@ function importChanges(target, source) {
 
         var oldValue = target[key];
 
-        if (angular.toJson(newValue) === angular.toJson(oldValue)) {
+        if (newValue === oldValue) {
             return;
         }
 
-        if (newValue === oldValue) {
+        if (angular.toJson(newValue) === angular.toJson(oldValue)) {
             return;
         }
 
