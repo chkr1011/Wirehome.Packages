@@ -12,10 +12,7 @@ def process_logic_message(message):
     elif type == "set_position":
         return __set_position__(message)
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    return wirehome.response_creator.not_supported(type)
 
 
 def process_adapter_message(message):
@@ -37,7 +34,7 @@ def __initialize__(message):
     wirehome.component.set_status("roller_shutter.state", "unknown")
     wirehome.component.set_status("roller_shutter.position", "unknown")
     wirehome.component.set_status("power.state", "unknown")
-    wirehome.component.set_status("power.consumption", "unknown")
+    wirehome.component.set_status("power.consumption", None)
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
     adapter_result = publish_adapter_message({
@@ -73,10 +70,11 @@ def __set_state__(state):
 
     if state == "turn_off":
         wirehome.component.set_status("roller_shutter.state", "off")
-        wirehome.component.set_status("roller_shutter.position", 0)
         wirehome.component.set_status("power.state", "off")
 
         if power_consumption != None:
+            # Set 0 because the roller shutter is off. The real value is only used when
+            # the roller shutter is moving into any direction.
             wirehome.component.set_status("power.consumption", 0)
 
         current_state = "off"
@@ -108,7 +106,7 @@ def __set_state__(state):
         countdown_uid = wirehome.context["component_uid"] + ".auto_off"
         wirehome.scheduler.start_countdown(countdown_uid, auto_off_timeout, __auto_off_callback__)
 
-    return {"type": "success"}
+    return wirehome.response_creator.success()
 
 
 def __auto_off_callback__(_):
@@ -124,15 +122,16 @@ def __set_position__(message):
     elif target_position < current_position:
         return __set_state__("move_up")
 
+
 def __position_tracker_callback__(parameters):
     if current_state == "off":
         return
-    
+
     elapsed_time = parameters["elapsed_millis"]
 
     global position_tracker_current
 
-    if current_state == "moving_up":    
+    if current_state == "moving_up":
         position_tracker_current -= elapsed_time
     elif current_state == "moving_down":
         position_tracker_current += elapsed_time
@@ -149,4 +148,3 @@ def __position_tracker_callback__(parameters):
 
     wirehome.component.set_status("roller_shutter.position", current_position)
     wirehome.component.set_status("roller_shutter.is_closed", is_closed)
-   
