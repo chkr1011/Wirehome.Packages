@@ -25,7 +25,7 @@ def __initialize__():
 
     backward_channel = config.get("backward_channel", None)
     if backward_channel == None:
-        return
+        return wirehome.response_creator.success()
 
     component_uid = wirehome.context["component_uid"]
 
@@ -81,9 +81,7 @@ def __set_state_internal__(state):
     else:
         wirehome.mqtt.publish(parameters)
 
-    result = {
-        "type": "success"
-    }
+    result = wirehome.response_creator.success()
 
     if config.get("update_status_from_backward_channel_only", False) == True:
         result["skip_status_update"] = True
