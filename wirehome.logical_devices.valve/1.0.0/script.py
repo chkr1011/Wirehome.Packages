@@ -29,7 +29,7 @@ def __initialize__(message):
     })
 
     if adapter_result.get("type", None) != "success":
-        wirehome.log.warning("Initialization of valve '{componentUid}' failed (Adapter result = {result}).".format(componentUid = wirehome.context["component_uid"], result = str(adapter_result)))
+        wirehome.log.warning("Initialization of valve '{componentUid}' failed (Adapter result = {result}).".format(componentUid=wirehome.context["component_uid"], result=str(adapter_result)))
         return adapter_result
 
     initial_state = config.get("initial_state", "closed")
@@ -55,6 +55,7 @@ def __set_state__(state):
     adapter_result = wirehome.publish_adapter_message(message)
 
     if adapter_result.get("type", None) != "success":
+        wirehome.log.warning("Setting state of valve '{componentUid}' failed (Adapter result = {result}).".format(componentUid=wirehome.context["component_uid"], result=str(adapter_result)))
         return adapter_result
 
     static_power_consumption = config.get("static_power_consumption", {})
@@ -67,6 +68,4 @@ def __set_state__(state):
         wirehome.component.set_status("valve.state", "closed")
         wirehome.component.set_status("power.consumption", static_power_consumption.get("closed", 0))
 
-    return {
-        "type": "success"
-    }
+    return wirehome.response_creator.success()
