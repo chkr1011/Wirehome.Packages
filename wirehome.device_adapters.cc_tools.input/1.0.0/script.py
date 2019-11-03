@@ -34,20 +34,20 @@ def __publish_state__():
     # Get the effective pin state because the event from the CCTools board manager
     # only contains the overall state of the device.
     service_result = wirehome.services.invoke(SERVICE_ID, "get_state", get_state_parameters)
-    state = service_result["pin_state"]
+    pin_state = service_result["pin_state"]
 
+    # Most of the CCTools devices have pull ups and are connected to GND
+    # in case a switch is closing etc.
     is_inverted = config.get("is_inverted", True)
 
-    button_state = "released"
-
-    if is_inverted == True and state == "low":
-        button_state = "pressed"
-    elif is_inverted == False and state == "high":
-        button_state = "pressed"
+    if is_inverted == True and pin_state == "low":
+        pin_state = "high"
+    elif is_inverted == True and pin_state == "high":
+        pin_state = "low"
 
     message = {
         "type": "state_changed",
-        "new_state": button_state
+        "new_state": pin_state
     }
 
     wirehome.publish_adapter_message(message)

@@ -1,14 +1,27 @@
+<style>
+    .last-activity-text {
+        color: lightgray;
+    }
+</style>
+
 <div>
-    <span class="label label-danger pull-right window-status" ng-show="component.getStatus('window.state')==='open'">
-        <span class="fas fa-exclamation-triangle window-status-icon"></span>
-        <span>{{ ctrl.localizationService.get('UI.WindowOpen') }}</span>
+    <span class="pull-left">
+        <span class="last-activity-text">Last opened:</span>
+        <span class="last-activity-text">{{component.getStatus('window.last_opened') | date : 'dd.MM HH:mm:ss' }}</span>
     </span>
-    <span class="label label-success pull-right window-status" ng-show="component.getStatus('window.state')==='closed'">
-        <span class="fas fa-check window-status-icon"></span>
-        <span>{{ ctrl.localizationService.get('UI.WindowClosed') }}</span>
-    </span>
-    <span class="label label-warning pull-right window-status" ng-show="component.getStatus('window.state')==='tilt'">
-        <span class="fas fa-exclamation-circle window-status-icon"></span>
-        <span>{{ ctrl.localizationService.get('UI.WindowTilt') }}</span>
-    </span>
+</div>
+
+<div class="input-group pull-right">
+    <a href=# class="btn btn-danger" ng-show="component.getStatus('window.state')==='open'">
+        <span class="fas fa-exclamation-triangle"></span>
+        <span>OPEN</span>
+    </a>
+    <a class="btn btn-success" ng-show="component.getStatus('window.state')==='closed'">
+        <span class="fas fa-check"></span>
+        <span>CLOSED</span>
+    </a>
+    <a class="btn btn-warning" ng-show="component.getStatus('window.state')==='tilt'">
+        <span class="fas fa-exclamation-circle"></span>
+        <span>TILT</span>
+    </a>
 </div>

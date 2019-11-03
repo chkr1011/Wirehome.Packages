@@ -1,13 +1,17 @@
+# TODO: Add support for "last opened / tilt"
+# TODO: Add support for "closed since".
+# TODO: Add generic storage for storing that values.
+
+import datetime
+
+
 def process_logic_message(message):
     type = message.get("type", None)
 
     if type == "initialize":
         return __initialize__(message)
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    return wirehome.response_creator.not_supported(type)
 
 
 def process_adapter_message(message):
@@ -18,19 +22,17 @@ def process_adapter_message(message):
 
         if new_state == "open":
             wirehome.component.set_status("window.state", "open")
+            wirehome.component.set_status("window.last_opened", datetime.datetime.now().isoformat())
         elif new_state == "closed":
             wirehome.component.set_status("window.state", "closed")
+            wirehome.component.set_status("window.last_closed", datetime.datetime.now().isoformat())
         elif new_state == "tilt":
-            wirehome.component.set_status("window.state", "detected")
+            wirehome.component.set_status("window.state", "tilt")
+            wirehome.component.set_status("window.last_tilt", datetime.datetime.now().isoformat())
 
-        return {
-            "type": "success"
-        }
+        return wirehome.response_creator.success()
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    return wirehome.response_creator.not_supported(type)
 
 
 def __initialize__(message):

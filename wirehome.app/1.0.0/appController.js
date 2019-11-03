@@ -295,19 +295,16 @@ function importChanges(target, source) {
     $.each(source, function (key) {
         var newValue = source[key];
 
-        if (!target.hasOwnProperty(key)) {
-            target[key] = newValue;
-            return;
-        }
+        if (target.hasOwnProperty(key)) {
+            var oldValue = target[key];
 
-        var oldValue = target[key];
+            if (newValue === oldValue) {
+                return;
+            }
 
-        if (newValue === oldValue) {
-            return;
-        }
-
-        if (angular.toJson(newValue) === angular.toJson(oldValue)) {
-            return;
+            if (angular.toJson(newValue) === angular.toJson(oldValue)) {
+                return;
+            }
         }
 
         target[key] = newValue;
