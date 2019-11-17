@@ -12,7 +12,7 @@ This service monitors all configured windows and shows notifications when any of
     {
         "monitoring_settings":
         {
-            "check_interval": 120
+            "interval": 120
         },
         "notification_settings":
         {
