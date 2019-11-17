@@ -99,7 +99,9 @@ def __is_sunrise_affected__(now):
 
 
 def __invoke_roller_shutter__(command):
-    for roller_shutter_uid in config.get("roller_shutters", []):
+    roller_shutters = config.get("roller_shutters", {})
+
+    for roller_shutter_uid in roller_shutters.keys():
         wirehome.debugger.trace("invoking " + command + " for " + roller_shutter_uid)
         wirehome.component_registry.process_message(roller_shutter_uid, {"type": command})
 
@@ -141,11 +143,19 @@ def __check_outdoor_temperature_is_low_(command):
 
     # TODO: Use resource service for translation
     if command == "move_down":
-        message = "Skipped closing roller shutters because outdoor temperature is low ({outdoor_temperature} °C)."
+        message = "Skipped closing roller shutters ({roller_shutters}) because outdoor temperature is low ({outdoor_temperature} °C)."
     elif command == "move_up":
-        message = "Skipped opening roller shutters because outdoor temperature is low ({outdoor_temperature} °C)."
+        message = "Skipped opening roller shutters ({roller_shutters}) because outdoor temperature is low ({outdoor_temperature} °C)."
 
-    wirehome.notifications.publish("information", message.format(outdoor_temperature=outdoor_temperature))
+    roller_shutters_text = ""
+    roller_shutters = config.get("roller_shutters", {})
+    for roller_shutter_uid in roller_shutters.keys():
+        roller_shutters_text += roller_shutters[roller_shutter_uid].get("caption", "")
+        roller_shutters_text += ", "
+
+    roller_shutters_text = roller_shutters_text[:-2]
+
+    wirehome.notifications.publish("information", message.format(roller_shutters=roller_shutters_text, outdoor_temperature=outdoor_temperature))
 
     return True
 
