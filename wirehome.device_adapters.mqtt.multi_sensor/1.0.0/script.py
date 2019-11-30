@@ -25,6 +25,8 @@ def __handle_mqtt_message__(key, mqtt_message):
     payload = mqtt_message["payload"]
     payload_string = wirehome.convert.to_string(payload)
 
+    wirehome.log.debug("Multi sensor received value (Key = {key}, Payload = {payload}).".format(key=key, payload=payload_string))
+
     adapter_message = {
         "type": "value_received",
         "key": key,
