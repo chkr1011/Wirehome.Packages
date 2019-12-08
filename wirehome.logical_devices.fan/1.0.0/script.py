@@ -3,12 +3,18 @@ def process_logic_message(message):
 
     if type == "initialize":
         return __initialize__(message)
-    elif type == "turn_off":
+    if type == "destroy":
+        return __destroy__(message)
+    if type == "enable":
+        return __enable__()
+    if type == "disable":
+        return __disable__()
+    if type == "turn_off":
         return __set_level__(0)
-    elif type == "set_level":
+    if type == "set_level":
         level = message.get("level", 0)
         return __set_level__(level)
-    elif type == "increase_level":
+    if type == "increase_level":
         current_level = wirehome.component.get_status("level.current")
         current_level += 1
 
@@ -17,7 +23,7 @@ def process_logic_message(message):
             current_level = 0
 
         return __set_level__(current_level)
-    elif type == "decrease_level":
+    if type == "decrease_level":
         current_level = wirehome.component.get_status("level.current")
         current_level -= 1
 
@@ -26,10 +32,7 @@ def process_logic_message(message):
 
         return __set_level__(current_level)
 
-    return {
-        "type": "exception.not_supported",
-        "origin_type": type
-    }
+    return wirehome.response_creator.not_supported(type)
 
 
 def process_adapter_message(message):
@@ -54,6 +57,11 @@ def __initialize__(message):
 
 
 def __set_level__(level):
+    is_enabled = wirehome.component.get_setting("is_enabled", True)
+    if not is_enabled:
+        #return wirehome.response_creator.disabled()
+        return { "type": "exception.disabled" }
+
     adapter_result = wirehome.publish_adapter_message({
         "type": "set_level",
         "level": level
@@ -64,6 +72,20 @@ def __set_level__(level):
 
     wirehome.component.set_status("level.current", level)
 
-    return {
-        "type": "success"
-    }
+    return wirehome.response_creator.success()
+
+
+def __destroy__(message):
+    return wirehome.publish_adapter_message({
+        "type": "destroy"
+    })
+
+
+def __disable__():
+    wirehome.component.set_setting("is_enabled", False)
+    return wirehome.response_creator.success()
+
+
+def __enable__():
+    wirehome.component.set_setting("is_enabled", True)
+    return wirehome.response_creator.success()
