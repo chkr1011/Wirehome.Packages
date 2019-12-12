@@ -46,17 +46,17 @@
             <div class="clearfix">
 
                 <span ng-if="component.getSetting('is_enabled', true) == false"
-                    class="component-status-text label label-danger">
+                    class="component-status-text component-status-text-danger">
                     <span class="fas fa-toggle-off"></span> Disabled
                 </span>
 
                 <span ng-if="component.getStatus('status.is_outdated', false)"
-                    class="component-status-text label label-warning">
+                    class="component-status-text component-status-text-warning">
                     <span class="fas fa-stopwatch"></span> <span>Outdated</span>
                 </span>
 
                 <span ng-if="component.getStatus('power.consumption', null) != null"
-                    class="component-status-text label label-warning">
+                    class="component-status-text component-status-text-warning">
                     <span class="fas fa-bolt"></span>
                     <span>{{(component.getStatus('power.consumption') | number:0) + ' Wh'}}</span>
                 </span>

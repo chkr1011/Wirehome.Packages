@@ -39,6 +39,10 @@
     min-width: 60px;
 }
 
+.btn {
+    border-width: 0 !important;
+}
+
 * {
     border-radius: 0 !important;
 }
@@ -48,6 +52,23 @@ body {
 }
 
 /* Custom styles */
+
+.component-status-text {
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.component-status-text-ok {
+    color: #3c763d;
+}
+
+.component-status-text-warning {
+    color: #f0ad4e;
+}
+
+.component-status-text-danger {
+    color: #d9534f;
+}
 
 .button-icon {
     margin-right: 5px;
@@ -60,20 +81,6 @@ body {
 
 .component-status-action {
     cursor: pointer;
-}
-
-.component-status-text {
-    font-weight: lighter;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 11px;
-    vertical-align: text-bottom;
-}
-
-.component-status-text-large {
-    font-weight: lighter;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: small;
-    margin-top: 7px;
 }
 
 .show-more-button {
