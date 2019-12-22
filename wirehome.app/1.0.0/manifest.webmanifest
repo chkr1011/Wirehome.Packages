@@ -5,6 +5,7 @@
     "display": "standalone",
     "background_color": "#ff0000",
     "description": "App for Wirehome.Core",
+    ​​"orientation": "portrait-primary",
     "icons": [
         {
             "src": "icon.png",

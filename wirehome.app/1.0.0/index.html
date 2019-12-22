@@ -16,16 +16,64 @@
     <link rel="icon" sizes="192x192" href="icon.png">
 
     <title>Wirehome.App</title>
+
+    <style>
+        .loading-body {
+            background: #427AB6;
+        }
+
+        .loading-title {
+            color: white;
+            font: 300 24px/1 'Open sans condensed', sans-serif;
+            left: 0;
+            letter-spacing: 4px;
+            margin-top: 75px;
+            position: absolute;
+            text-align: center;
+            top: calc(50% - 50px);
+            width: 100%;
+        }
+
+        .loading-message {
+            color: lightgray;
+            font-size: 10pt;
+        }
+
+        .loading-animation {
+            animation: rotate 1s infinite linear;
+            border-bottom: 7px solid white;
+            border-left: 7px solid white;
+            border-radius: 100% !important;
+            border-right: 7px solid gray;
+            border-top: 7px solid white;
+            box-sizing: border-box;
+            height: 85px;
+            left: calc(50% - 50px);
+            position: absolute;
+            top: calc(50% - 85px);
+            width: 85px;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg) translate3d(0, 0, 0);
+            }
+            to {
+                transform: rotate(359deg) translate3d(0, 0, 0);
+            }
+        }
+    </style>
 </head>
 
-<body ng-class="!ctrl.isInitialized ? 'loading-body' : 'initialized-body'" class="container" ng-app="app" ng-controller="AppController as ctrl">
+<body ng-class="!ctrl.isInitialized ? 'loading-body' : 'initialized-body'" class="loading-body container" ng-app="app"
+    ng-controller="AppController as ctrl">
     <div ng-hide="ctrl.isInitialized">
-        <div class="loadingAnimation"></div>
-        <h3 class="loadingTitle">
+        <div class="loading-animation"></div>
+        <h3 class="loading-title">
             Wirehome.App
             <br />
             <br />
-            <span class="loadingMessage">Home Automation</span>
+            <span class="loading-message">Home Automation</span>
         </h3>
     </div>
 
@@ -33,7 +81,7 @@
 
     <div class="container-fluid" id="content" ng-show="ctrl.isInitialized">
         <div ng-include="'views/notificationsContainerTemplate.html'"></div>
-        
+
         <div ng-repeat="panel in ctrl.panels | orderBy:['positionIndex']" ng-include="panel.viewSource"></div>
 
         <div ng-include="'views/footerContainerTemplate.html'"></div>

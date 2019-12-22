@@ -39,10 +39,6 @@
     min-width: 60px;
 }
 
-.btn {
-    border-width: 0 !important;
-}
-
 * {
     border-radius: 0 !important;
 }
@@ -128,25 +124,9 @@ body {
     white-space: nowrap;
 }
 
-.loading-body{
-    background: #427AB6;
-}
-
 .initialized-body{
     background: #838383;
     padding: 0;
-}
-
-.loadingTitle {
-    color: white;
-    font: 300 24px/1 'Open sans condensed', sans-serif;
-    left: 0;
-    letter-spacing: 4px;
-    margin-top: 75px;
-    position: absolute;
-    text-align: center;
-    top: calc(50% - 50px);
-    width: 100%;
 }
 
 .footer-icon {
@@ -158,36 +138,6 @@ body {
     font-size: 20px;
 }
 
-.loadingMessage {
-    color: lightgray;
-    font-size: 10pt;
-}
-
 .pointer {
     cursor: pointer;
-}
-
-.loadingAnimation {
-    animation: rotate 1s infinite linear;
-    border-bottom: 7px solid white;
-    border-left: 7px solid white;
-    border-radius: 100% !important;
-    border-right: 7px solid gray;
-    border-top: 7px solid white;
-    box-sizing: border-box;
-    height: 85px;
-    left: calc(50% - 50px);
-    position: absolute;
-    top: calc(50% - 85px);
-    width: 85px;
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg) translate3d(0, 0, 0);
-    }
-
-    to {
-        transform: rotate(359deg) translate3d(0, 0, 0);
-    }
 }
