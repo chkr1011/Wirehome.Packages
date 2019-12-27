@@ -272,10 +272,11 @@ def __get_affected_mode_internal__(modes):
 
 
 def __get_heating_status__():
-    status = {}
+    status = []
     for zone in _zones:
-        status[zone.uid] = {
+        status.append({
+            "uid": zone.uid,
             "status_reason": zone.status_reason
-        }
+        })
 
     return status

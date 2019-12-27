@@ -8,6 +8,7 @@ function createAppController($http, $scope, apiService, localizationService, com
     c.panels = [];
     c.componentGroups = [];
     c.globalVariables = {};
+    c.status = {}
 
     c.notificationService = notificationService;
     c.componentService = componentService;
@@ -141,6 +142,7 @@ function createAppController($http, $scope, apiService, localizationService, com
                 c.setActivePanel(c.componentGroups[0].uid);
             }
 
+            c.status = status;
             c.panels = status.panels;
             c.panels.push({
                 uid: "componentGroups",

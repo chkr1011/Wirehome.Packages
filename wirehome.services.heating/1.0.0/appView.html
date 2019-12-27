@@ -7,43 +7,14 @@
         <span class="panel-title pull-left">Heating</span>
     </div>
 
-    <div class="container-fluid" style="margin: 10px;">
-        
+    <div class="container-fluid">
+        <table>
+            <tr ng-repeat="zone in ctrl.status.heating">
+                <td><span style="margin-right: 1em;">{{zone.uid}}</span></td>
 
+                <td><span><b>{{zone.status_reason}}</b></span></td>
+            </tr>
+        </table>
 
-        <div class="row text-center">
-            <div class="col-xs-3">
-                <span class="weather-station-icon fas fa-thermometer-half"></span>
-                <br />
-                <span class="weather-station-value">{{(ctrl.getGlobalVariable('outdoor.temperature') | number:1) + ' °C' }}</span>
-            </div>
-            <div class="col-xs-3">
-                <span class="weather-station-icon fas fa-tint"></span>
-                <br />
-                <span class="weather-station-value">{{(ctrl.getGlobalVariable('outdoor.humidity') | number:0) + ' %'}}</span>
-            </div>
-            <div class="col-xs-3">
-                <span class="weather-station-icon fas fa-sun"></span>
-                <br />
-                <span class="weather-station-value">{{ctrl.getGlobalVariable('outdoor.sunrise').substring(0, 5)}}</span>
-            </div>
-            <div class="col-xs-3">
-                <span class="weather-station-icon fas fa-moon"></span>
-                <br />
-                <span class="weather-station-value">{{ctrl.getGlobalVariable('outdoor.sunset').substring(0, 5)}}</span>
-            </div>
-        </div>
-
-        <div ng-show="ctrl.getGlobalVariable('outdoor.condition.image_url', null)!=null" class="row">
-            <div class="col-xs-12 text-center">
-                <img class="weather-condition-image" ng-src="{{ctrl.getGlobalVariable('outdoor.condition.image_url')}}" />
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-12">
-                <a class="btn btn-default btn-block" style="margin-top: 10px;" href="{{ctrl.getGlobalVariable('outdoor.forecast_url')}}" target="_blank">Forecast</a>
-            </div>
-        </div>
     </div>
 </div>
