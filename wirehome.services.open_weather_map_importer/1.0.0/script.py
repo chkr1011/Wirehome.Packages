@@ -23,7 +23,7 @@ def start():
     wirehome.scheduler.start_thread("wirehome.open_weather_map_importer.poll_thread", __poll_status__)
 
     wirehome.app.register_panel({
-        "uid": "owm_panel",
+        "uid": "weather_panel",
         "position_index": 1,
         "view_source": wirehome.package_manager.get_file_uri(wirehome.context["service_uid"], "appView.html")
     })

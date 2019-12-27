@@ -54,7 +54,7 @@ function createAppController($http, $scope, apiService, localizationService, com
     c.applyNewStatus = function (status) {
         if (c.isConfigured !== true) {
             console.log("Building UI...");
-            localizationService.load(status.global_variables["system.language_code"]);
+            localizationService.load(status.globalVariables["system.language_code"]);
 
             $.each(status.componentGroups, function (i, componentGroup) {
                 if (componentGroup.settings["app.is_visible"] === false) {
@@ -164,7 +164,7 @@ function createAppController($http, $scope, apiService, localizationService, com
 
         c.notifications = status.notifications;
 
-        importChanges(c.globalVariables, status.global_variables);
+        importChanges(c.globalVariables, status.globalVariables);
 
         c.isInitialized = true;
     };

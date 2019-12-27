@@ -2,10 +2,10 @@
     var srv = this;
 
     srv.apiStatus =
-        {
-            isReachable: false,
-            errorMessage: null
-        };
+    {
+        isReachable: false,
+        errorMessage: null
+    };
 
     srv.apiStatusUpdatedCallback = null;
     srv.newStatusReceivedCallback = null;
@@ -49,67 +49,13 @@
             setTimeout(function () { srv.pollStatus(); }, 5000);
         };
 
-        var status = {};
-        var promises = [];
-
-        promises.push(new Promise(function (resolve, reject) {
-            $http.get("/api/v1/component_groups").then(
-                function (response) {
-                    status.componentGroups = response.data;
-                    resolve();
-                },
-                function () {
-                    reject();
-                });
-        }));
-
-        promises.push(new Promise(function (resolve, reject) {
-            $http.get("/api/v1/components").then(
-                function (response) {
-                    status.components = response.data;
-                    resolve();
-                },
-                function () {
-                    reject();
-                });
-        }));
-
-        promises.push(new Promise(function (resolve, reject) {
-            $http.get("/api/v1/global_variables").then(
-                function (response) {
-                    status.global_variables = response.data;
-                    resolve();
-                },
-                function () {
-                    reject();
-                });
-        }));
-
-        promises.push(new Promise(function (resolve, reject) {
-            $http.get("/api/v1/notifications").then(
-                function (response) {
-                    status.notifications = response.data;
-                    resolve();
-                },
-                function () {
-                    reject();
-                });
-        }));
-
-        promises.push(new Promise(function (resolve, reject) {
-            $http.get("/api/v1/app/panels").then(
-                function (response) {
-                    status.panels = response.data;
-                    resolve();
-                },
-                function () {
-                    reject();
-                });
-        }));
-
-        Promise.all(promises).then(
-            function () { successHandler(status); },
-            function () { errorHandler(); });
+        $http.get("/api/v1/app/status").then(
+            function (response) {
+                successHandler(response.data);
+            },
+            function () {
+                errorHandler();
+            });
     };
 
     srv.executePost = function (uri, data, successCallback) {

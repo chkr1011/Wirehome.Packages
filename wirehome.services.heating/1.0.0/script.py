@@ -21,7 +21,7 @@ class Zone:
     effective_target_temperature = None
     outdoor_temperature = None
     effective_outdoor_temperature = None
-    affected_reduction = None
+    affected_mode = None
     valve_command = None
     status_reason = None
     low_delta_temperature = None
@@ -30,13 +30,20 @@ class Zone:
     high_delta_temperature_reached = False
     error = None
 
-# TODO: Rename reduction to "mode" and set one "forced_mode" via API.
 
 def initialize():
     pass
 
 
 def start():
+    wirehome.app.register_panel({
+        "uid": "heating_panel",
+        "position_index": 2,
+        "view_source": wirehome.package_manager.get_file_uri(wirehome.context["service_uid"], "appView.html")
+    })
+
+    wirehome.app.register_status_provider("heating", __get_heating_status__)
+
     global _zones
     zoneConfigs = config.get("zones", {})
     for zone_key in zoneConfigs:
@@ -56,7 +63,7 @@ def start():
     global _is_running
     _is_running = True
 
-    update() # Update now. We have to wait one full delay otherwise.
+    update()  # Update now. We have to wait one full delay otherwise.
 
 
 def stop():
@@ -89,7 +96,7 @@ def __update__(_):
             "current_temperature": zone.current_temperature,
             "target_temperature": zone.target_temperature,
             "effective_target_temperature": zone.effective_target_temperature,
-            "affected_reduction": zone.affected_reduction,
+            "affected_mode": zone.affected_mode,
             "high_delta_temperature": zone.high_delta_temperature,
             "high_delta_temperature_reached": zone.high_delta_temperature_reached,
             "low_delta_temperature": zone.low_delta_temperature,
@@ -107,7 +114,7 @@ def __update_zone__(zone):
         zone.error = None
 
         __fill_outdoor_temperature__(zone)
-        __fill_affected_reduction__(zone)
+        __fill_affected_mode__(zone)
         __fill_target_temperature__(zone)
         __fill_window_status__(zone)
         __fill_current_temperature__(zone)
@@ -170,8 +177,8 @@ def __fill_target_temperature__(zone):
     zone.target_temperature = zone.config.get("target_temperature", 20)
     zone.effective_target_temperature = zone.target_temperature
 
-    if zone.affected_reduction != None:
-        zone.effective_target_temperature = zone.affected_reduction.get("target_temperature", 16)
+    if zone.affected_mode != None:
+        zone.effective_target_temperature = zone.affected_mode.get("target_temperature", 16)
 
     low_delta = zone.config.get("low_delta", 0.3)
     zone.low_delta_temperature = zone.effective_target_temperature - low_delta
@@ -233,32 +240,42 @@ def __fill_window_status__(zone):
     zone.window_status = "closed"
 
 
-def __fill_affected_reduction__(zone):
-    # The zone reductions have priority. If no one of these is available or match
-    # the global reductions become responsible.
-    reductions = zone.config.get("reductions", {})
-    (reduction_key, reduction) = __get_affected_reduction_internal__(reductions)
+def __fill_affected_mode__(zone):
+    # The zone modes have priority. If no one of these is available or match
+    # the global modes become responsible.
+    modes = zone.config.get("modes", {})
+    (mode_key, mode) = __get_affected_mode_internal__(modes)
 
-    if reduction_key != None:
-        zone.affected_reduction = reduction
+    if mode_key != None:
+        zone.affected_mode = mode
 
-    reductions = config.get("reductions", {})
-    (reduction_key, reduction) = __get_affected_reduction_internal__(reductions)
+    modes = config.get("modes", {})
+    (mode_key, mode) = __get_affected_mode_internal__(modes)
 
-    if reduction_key != None:
-        zone.affected_reduction = reduction
+    if mode_key != None:
+        zone.affected_mode = mode
 
 
-def __get_affected_reduction_internal__(reductions):
+def __get_affected_mode_internal__(modes):
     now = time.strftime("%H:%M:%S")
 
-    for reduction_key in reductions:
-        reduction = reductions[reduction_key]
+    for mode_key in modes:
+        mode = modes[mode_key]
 
-        begin = reduction.get("begin", "00:00:00")
-        end = reduction.get("end", "23:59:59")
+        begin = mode.get("begin", "00:00:00")
+        end = mode.get("end", "23:59:59")
 
         if begin <= now and end >= now:
-            return (reduction_key, reduction)
+            return (mode_key, mode)
 
     return (None, None)
+
+
+def __get_heating_status__():
+    status = {}
+    for zone in _zones:
+        status[zone.uid] = {
+            "status_reason": zone.status_reason
+        }
+
+    return status
