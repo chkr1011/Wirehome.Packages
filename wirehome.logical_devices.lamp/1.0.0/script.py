@@ -10,6 +10,10 @@ def process_logic_message(message):
 
     if type == "initialize":
         return __initialize__(message)
+    elif type == "disable":
+        return __disable__()
+    elif type == "enable":
+        return __enable__()
     elif type == "turn_off":
         return __turn_off__()
     elif type == "turn_on":
@@ -134,6 +138,10 @@ def __initialize__(message):
 
 
 def __set_state__():
+    is_enabled = wirehome.component.get_setting("is_enabled", True)
+    if not is_enabled:
+        return wirehome.response_creator.disabled()
+
     message = {
         "type": "set_state",
         "power_state": _power_state
@@ -180,4 +188,14 @@ def __set_state__():
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
+    return wirehome.response_creator.success()
+
+
+def __disable__():
+    wirehome.component.set_setting("is_enabled", False)
+    return wirehome.response_creator.success()
+
+
+def __enable__():
+    wirehome.component.set_setting("is_enabled", True)
     return wirehome.response_creator.success()

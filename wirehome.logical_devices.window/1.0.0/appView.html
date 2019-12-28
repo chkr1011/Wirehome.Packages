@@ -12,16 +12,16 @@
 </div>
 
 <div class="input-group pull-right">
-    <a href=# class="btn btn-danger" ng-show="component.getStatus('window.state')==='open'">
+    <button class="btn btn-danger" ng-show="component.getStatus('window.state')==='open'">
         <span class="fas fa-exclamation-triangle"></span>
         <span>OPEN</span>
-    </a>
-    <a class="btn btn-success" ng-show="component.getStatus('window.state')==='closed'">
+    </button>
+    <button class="btn btn-success" ng-show="component.getStatus('window.state')==='closed'">
         <span class="fas fa-check"></span>
         <span>CLOSED</span>
-    </a>
-    <a class="btn btn-warning" ng-show="component.getStatus('window.state')==='tilt'">
+    </button>
+    <button class="btn btn-warning" ng-show="component.getStatus('window.state')==='tilt'">
         <span class="fas fa-exclamation-circle"></span>
         <span>TILT</span>
-    </a>
+    </button>
 </div>

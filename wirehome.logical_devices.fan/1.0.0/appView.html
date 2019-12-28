@@ -1,15 +1,21 @@
-<div class="btn-group pull-right" role="group">
-    <button href="#" class="btn btn-default" ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'decrease_level'})">
-        <span class="fas fa-arrow-down"></span>&nbsp;
+<style>
+    .rs-btn {
+        width: 3em !important;
+    }
+</style>
+
+<div class="btn-group pull-right ">
+    <button class="btn rs-btn" ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'decrease_level'})">
+        <span class="fas fa-arrow-down"></span>
     </button>
 
-    <button href="#" class="btn btn-default" ng-repeat="i in getNumbers(component.getConfiguration('level.max'))"
+    <button class="btn rs-btn" ng-repeat="i in getNumbers(component.getConfiguration('level.max'))"
         ng-class="component.getStatus('level.current')===0 && i===0 ? 'btn-success' : component.getStatus('level.current')===i ? 'btn-danger' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'set_level','level':i})">
         <span>{{i}}</span>
     </button>
 
-    <button href="#" class="btn btn-default" ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'increase_level'})">
-        <span class="fas fa-arrow-up"></span>&nbsp;
+    <button class="btn rs-btn" ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'increase_level'})">
+        <span class="fas fa-arrow-up"></span>
     </button>
 </div>

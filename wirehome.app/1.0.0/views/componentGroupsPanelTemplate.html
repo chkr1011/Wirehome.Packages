@@ -25,25 +25,24 @@
 
             <div ng-if="component.showMore">
                 <div>
-                    <br />
-                    <span class="btn btn-success" ng-click="ctrl.componentService.enable(component.uid)"><span
-                            class="fas fa-toggle-on button-icon"></span>Enable</span>
-                    <span class="btn btn-danger" ng-click="ctrl.componentService.disable(component.uid)"><span
-                            class="fas fa-toggle-on button-icon"></span>Disable</span>
-                    <span class="btn btn-warning" ng-click="ctrl.componentService.initialize(component.uid)"><span
-                            class="fas fa-play button-icon"></span>Initialize</span>
-
-                    <span class="btn btn-default" ng-click="ctrl.moveComponent(component, componentGroup, 'up')"><span
-                            class="fas fa-arrow-up button-icon"></span>Move up</span>
-                    <span class="btn btn-default" ng-click="ctrl.moveComponent(component, componentGroup, 'down')"><span
-                            class="fas fa-arrow-down button-icon"></span>Move down</span>
+                    <button class="btn btn-success" ng-click="ctrl.componentService.enable(component.uid)"><span
+                            class="fas fa-toggle-on button-icon"></span>Enable</button>
+                    <button class="btn btn-danger" ng-click="ctrl.componentService.disable(component.uid)"><span
+                            class="fas fa-toggle-on button-icon"></span>Disable</button>
+                    <button class="btn btn-warning" ng-click="ctrl.componentService.initialize(component.uid)"><span
+                            class="fas fa-play button-icon"></span>Initialize</button>
+                    <br/>
+                    <button class="btn" ng-click="ctrl.moveComponent(component, componentGroup, 'up')"><span
+                            class="fas fa-arrow-up button-icon"></span>Move up</button>
+                    <button class="btn" ng-click="ctrl.moveComponent(component, componentGroup, 'down')"><span
+                            class="fas fa-arrow-down button-icon"></span>Move down</button>
                 </div>
                 <hr />
             </div>
 
             <div class="clearfix" style="padding-top: 10px;" ng-include="component.viewSource"></div>
 
-            <div class="clearfix">
+            <div class="clearfix" style="height: 28px;">
 
                 <span ng-if="component.getSetting('is_enabled', true) == false"
                     class="component-status-text component-status-text-danger">

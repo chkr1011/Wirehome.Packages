@@ -5,6 +5,10 @@ def process_logic_message(message):
         return __initialize__(message)
     elif type == "turn_off":
         return __set_state__("turn_off")
+    elif type == "disable":
+        return __disable__()
+    elif type == "enable":
+        return __enable__()
     elif type == "move_up":
         return __set_state__("move_up")
     elif type == "move_down":
@@ -53,6 +57,10 @@ def __initialize__(message):
 
 
 def __set_state__(state):
+    is_enabled = wirehome.component.get_setting("is_enabled", True)
+    if not is_enabled:
+        return wirehome.response_creator.disabled()
+
     adapter_result = wirehome.publish_adapter_message({
         "type": state
     })
@@ -144,7 +152,25 @@ def __position_tracker_callback__(parameters):
     global current_position
     current_position = (position_tracker_current * 100) / position_tracker_max
 
+    if current_position > 100:
+        current_position = 100
+
+    if current_position < 0:
+        current_position = 0
+
     is_closed = current_position > 95
 
     wirehome.component.set_status("roller_shutter.position", current_position)
     wirehome.component.set_status("roller_shutter.is_closed", is_closed)
+
+
+def __disable__():
+    wirehome.component.set_setting("is_enabled", False)
+
+    return wirehome.response_creator.success()
+
+
+def __enable__():
+    wirehome.component.set_setting("is_enabled", True)
+
+    return wirehome.response_creator.success()

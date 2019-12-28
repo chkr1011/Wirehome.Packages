@@ -1,6 +1,9 @@
 ﻿<style>
+    .rs-btn {
+        width: 4em !important;
+    }
+
     .status-icon {
-        font-size: 18px;
         margin-top: 7px;
         margin-right: 10px;
     }
@@ -22,16 +25,16 @@
     }
 </style>
 
-<span class="status-icon pull-left fas fa-square-full" ng-class="component.getStatus('roller_shutter.position')===100 ? 'status-icon-ok' : 'status-icon-default'"></span>
+<span class="status-icon pull-left fas fa-square-full" ng-class="component.getStatus('roller_shutter.position')===100 ? 'status-icon-ok' : 'status-icon-default'"><span> {{component.getStatus('roller_shutter.position', 0)}} %</span></span>
 
 <div class="btn-group pull-right">
-    <a href="#" class="btn" ng-class="component.getStatus('roller_shutter.state')==='moving_up' ? 'btn-danger' : 'btn-default'"
+    <button class="btn rs-btn" ng-class="component.getStatus('roller_shutter.state')==='moving_up' ? 'btn-danger' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'move_up'})"><span class="fas fa-arrow-up"></span>
-    </a>
-    <a href="#" class="btn" ng-class="component.getStatus('roller_shutter.state')==='off' ? 'btn-success' : 'btn-default'"
+    </button>
+    <button class="btn rs-btn" ng-class="component.getStatus('roller_shutter.state')==='off' ? 'btn-success' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_off'})"><span class="fas fa-stop"></span>
-    </a>
-    <a href="#" class="btn btn-default" ng-class="component.getStatus('roller_shutter.state')==='moving_down' ? 'btn-danger' : 'btn-default'"
+    </button>
+    <button class="btn rs-btn" ng-class="component.getStatus('roller_shutter.state')==='moving_down' ? 'btn-danger' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'move_down'})"><span class="fas fa-arrow-down"></span>
-    </a>
+    </button>
 </div>

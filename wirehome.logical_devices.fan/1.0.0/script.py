@@ -59,8 +59,7 @@ def __initialize__(message):
 def __set_level__(level):
     is_enabled = wirehome.component.get_setting("is_enabled", True)
     if not is_enabled:
-        #return wirehome.response_creator.disabled()
-        return { "type": "exception.disabled" }
+        return wirehome.response_creator.disabled()
 
     adapter_result = wirehome.publish_adapter_message({
         "type": "set_level",

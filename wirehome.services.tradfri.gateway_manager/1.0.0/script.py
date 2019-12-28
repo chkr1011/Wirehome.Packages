@@ -1,8 +1,9 @@
-import sys
-from time import sleep
 TIMER_ID = "wirehome.tradfri.gateway_manager.polling"
 
 config = {}
+
+from time import sleep
+import sys
 
 
 def initialize():
@@ -21,7 +22,7 @@ def stop():
     wirehome.scheduler.stop_timer(TIMER_ID)
 
 
-def get_status():
+def get_debug_infomation(_):
     return {
         "devices": _devices,
         "trace": wirehome.debugger.get_trace(),
