@@ -22,6 +22,7 @@ class Zone:
     outdoor_temperature = None
     effective_outdoor_temperature = None
     affected_mode = None
+    affected_mode_key = None
     valve_command = None
     status_reason = None
     low_delta_temperature = None
@@ -97,6 +98,7 @@ def __update__(_):
             "target_temperature": zone.target_temperature,
             "effective_target_temperature": zone.effective_target_temperature,
             "affected_mode": zone.affected_mode,
+            "affected_mode_key": zone.affected_mode_key,
             "high_delta_temperature": zone.high_delta_temperature,
             "high_delta_temperature_reached": zone.high_delta_temperature_reached,
             "low_delta_temperature": zone.low_delta_temperature,
@@ -241,6 +243,10 @@ def __fill_window_status__(zone):
 
 
 def __fill_affected_mode__(zone):
+    # Reset the mode first. Otherwise it will stay forever.
+    zone.affected_mode = None
+    zone.affected_mode_key = None
+
     # The zone modes have priority. If no one of these is available or match
     # the global modes become responsible.
     modes = zone.config.get("modes", {})
@@ -248,12 +254,14 @@ def __fill_affected_mode__(zone):
 
     if mode_key != None:
         zone.affected_mode = mode
+        zone.affected_mode_key = mode_key
 
     modes = config.get("modes", {})
     (mode_key, mode) = __get_affected_mode_internal__(modes)
 
     if mode_key != None:
         zone.affected_mode = mode
+        zone.affected_mode_key = mode_key
 
 
 def __get_affected_mode_internal__(modes):
@@ -265,7 +273,12 @@ def __get_affected_mode_internal__(modes):
         begin = mode.get("begin", "00:00:00")
         end = mode.get("end", "23:59:59")
 
-        if begin <= now and end >= now:
+        if begin > end:
+            if now >= begin:
+                return (mode_key, mode)
+            elif now <= end:
+                return (mode_key, mode)
+        elif now >= begin and now <= end:
             return (mode_key, mode)
 
     return (None, None)
