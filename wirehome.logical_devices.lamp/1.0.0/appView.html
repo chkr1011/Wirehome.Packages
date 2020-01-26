@@ -1,6 +1,5 @@
 <style>
     .brightness-value {
-        font-weight: bold;
         min-width: 90px;
         max-width: 110px;
     }
@@ -15,11 +14,10 @@
     }
 </style>
 
-<div class="pull-right">
+<div class="clearfix">
 
-    <div class="">
-
-        <div class="btn-group">
+    <div>
+        <div class="btn-group pull-right">
             <button class="btn on-off-btn"
                 ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
                 ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_on'})">ON</button>
@@ -27,39 +25,34 @@
                 ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
                 ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_off'})">OFF</button>
         </div>
-
     </div>
 
-    <div ng-show="component.getStatus('brightness.value') != null" class="">
+    <div ng-if="component.getStatus('brightness.value') != null">
+        <div class="btn-group pull-right">
+            <button class="btn btn-default">Brightness:</button>
 
-        <div class="btn-group">
-            <button class="btn">Brightness:</button>
-
-            <button class="btn"
+            <button class="btn btn-default"
                 ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'increase_brightness','value':5})"><span
                     class="fas fa-arrow-up"></span>
             </button>
             <button class="btn btn-default">
                 <span class="brightness-value">{{component.getStatus('brightness.value') + ' %'}}</span>
             </button>
-            <button class="btn"
+            <button class="btn btn-default"
                 ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'decrease_brightness','value':5})"><span
                     class="fas fa-arrow-down"></span>
             </button>
         </div>
-
     </div>
 
-    <div ng-show="component.getStatus('color.value') != null" class="">
-
-        <div class="btn-group">
-            <button class="btn">Color:</button>
+    <div ng-if="component.getStatus('color.value') != null">
+        <div class="btn-group pull-right">
+            <button class="btn btn-default">Color:</button>
             <button ng-repeat="color in component.getConfiguration('colors', [])" class="btn btn-default color-item"
                 ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'set_color','color':color.value})">
                 <div ng-style="{'background': color.value}">&nbsp;</div>
             </button>
         </div>
-
     </div>
 
 </div>

@@ -17,15 +17,17 @@
 .btn {
     border: 0px !important;
     height: 48px;
+    text-shadow: none;
 }
 
 .btn-primary {
-    background: #007bff !important;
+    background: #007ACC !important;
     background-image: none !important;
 }
 
 .btn-default {
-    background: #f8f9fa !important;
+    background: grey !important;
+    color: white;
     background-image: none !important;
 }
 
@@ -55,9 +57,123 @@
 
 body {
     margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 2pt;
+    background: #2D2D2D;
 }
 
 /* Custom styles */
+
+/* Text */
+
+.wh-text-dimmed {
+    color: #858585;
+}
+
+.wh-text-info {
+    color: #28A745;
+}
+
+.wh-text-warning {
+    color: #F0AD4E;
+}
+
+.wh-text-danger {
+    color: #D9534F;
+}
+
+/* Panels */
+
+.wh-component-panel {
+    background: #2D2D2D;
+    padding: 10px;
+    color: white;
+    border-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    border-top-width: 0px;
+    border-color: #1E1E1E;
+}
+
+.wh-panel-header {
+    color: white;
+    padding: 10px;
+    border-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    border-top-width: 0px;
+    border-color: #1E1E1E;
+}
+
+.wh-panel-header-caption {
+    font-size: 16px;
+}
+
+.wh-panel-header-active {
+    background: #007ACC;
+    color: white;
+}
+
+.wh-panel-header-inactive {
+    background: #2D2D2D;
+}
+
+.wh-component-caption {
+    font-size: 18px;
+}
+
+.wh-component-icon {
+    color: #007ACC;
+    margin-right: 10px;
+}
+
+/* Status */
+.wh-status-text-small {
+    font-size: 11px;
+}
+
+.wh-status-text {
+    font-size: 14px;
+}
+
+/* Notifications */
+.wh-notification {
+    padding: 10px;
+    font-size: 12px;
+    color: white;
+    border-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    border-top-width: 0px;
+    border-color: gray;
+}
+
+.wh-notification-info {
+    background: #28A745;
+}
+
+.wh-notification-warning {
+    background: #F0AD4E;
+}
+
+.wh-notification-danger {
+    background: #D9534F;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 .component-status-text {
     font-size: 16px;
@@ -91,8 +207,6 @@ body {
 
 .show-more-button {
     color: gainsboro;
-    margin-left: 10px;
-    font-size: 1.5em;
     cursor: pointer;
 }
 
@@ -104,11 +218,6 @@ body {
 .version-text {
     font-size: 10pt;
     margin-right: 5px;
-}
-
-.component-icon {
-    margin-right: 10px;
-    font-size: 1.5em;
 }
 
 .component-group-icon {

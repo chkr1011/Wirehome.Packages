@@ -1,5 +1,8 @@
 <style>
-
+    .key {
+        font-weight: bold;
+        margin-left: 1em;
+    }
 </style>
 
 <div id="panel-heating" class="row panel panel-active" style="background: white;">
@@ -9,12 +12,21 @@
 
     <div class="container-fluid">
         <table>
-            <tr ng-repeat="zone in ctrl.status.heating">
-                <td><span style="margin-right: 1em;">{{zone.uid}}</span></td>
+            <tr ng-repeat="zone in ctrl.status['heating']['zones']">
+                <td><span>{{zone.uid}}</span></td>
+                <td><span class="key">CT=</span>{{zone.current_temperature}}</td>
+                <td><span class="key">TT=</span>{{zone.effective_target_temperature}}</td>
+                <td><span class="key">VC=</span>{{zone.valve_command}}</td>
 
-                <td><span><b>{{zone.status_reason}}</b></span></td>
+                <tr>
+                    <td colspan="2">
+                        <span><b>{{zone.status_reason}}</b></span>
+                    </td>
+                    <td></td>
+                </tr>
             </tr>
         </table>
-
+        <div><span>Last update=</span>{{ctrl.status["heating"]["last_update"]}}</div>
+        <div><span>Enabled=</span>{{ctrl.status["heating"]["is_enabled"]}}</div>
     </div>
 </div>

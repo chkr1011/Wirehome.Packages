@@ -1,3 +1,4 @@
+import datetime
 import time
 import sys
 import math
@@ -5,10 +6,13 @@ import math
 TIMER_ID = "wirehome.heating.monitor"
 
 _is_running = False
+_is_enabled = True
 
 _zones = []
 
 _zone_status = {}
+
+_last_update = None
 
 config = {}
 
@@ -21,6 +25,7 @@ class Zone:
     effective_target_temperature = None
     outdoor_temperature = None
     effective_outdoor_temperature = None
+    forced_mode = None
     affected_mode = None
     affected_mode_key = None
     valve_command = None
@@ -59,7 +64,7 @@ def start():
         _zones.append(zone)
 
     monitoring_interval = config.get("monitoring", {}).get("interval", 5000)
-    wirehome.scheduler.start_timer(TIMER_ID, monitoring_interval, __update__)
+    wirehome.scheduler.start_timer(TIMER_ID, monitoring_interval, __update_callback__)
 
     global _is_running
     _is_running = True
@@ -74,19 +79,29 @@ def stop():
     _is_running = False
 
 
+def enable():
+    global _is_enabled
+    _is_enabled = True
+
+
+def disable():
+    global _is_enabled
+    _is_enabled = False
+
+
 def get_status():
     return {
         "is_running": _is_running,
-        "zone_status": _zone_status
+        "zone_status": _zone_status,
+        "last_update": _last_update,
+        "is_enabled": _is_enabled,
     }
 
 
 def update():
-    # This method can be called via API to force update.
-    __update__(None)
+    if not _is_enabled:
+        return
 
-
-def __update__(_):
     for zone in _zones:
         __update_zone__(zone)
 
@@ -99,6 +114,7 @@ def __update__(_):
             "effective_target_temperature": zone.effective_target_temperature,
             "affected_mode": zone.affected_mode,
             "affected_mode_key": zone.affected_mode_key,
+            "forced_mode": zone.forced_mode,
             "high_delta_temperature": zone.high_delta_temperature,
             "high_delta_temperature_reached": zone.high_delta_temperature_reached,
             "low_delta_temperature": zone.low_delta_temperature,
@@ -107,6 +123,13 @@ def __update__(_):
             "valve_command": zone.valve_command,
             "error": zone.error
         }
+
+    global _last_update
+    _last_update = datetime.datetime.now().isoformat()
+
+
+def __update_callback__(_):
+    update()
 
 
 def __update_zone__(zone):
@@ -285,11 +308,24 @@ def __get_affected_mode_internal__(modes):
 
 
 def __get_heating_status__():
-    status = []
+    """
+    This method generates all the information which is needed for the heating panel in the app.
+    """
+
+    status = {}
+    status["last_update"] = _last_update
+    status["is_enabled"] = _is_enabled
+
+    zones = []
     for zone in _zones:
-        status.append({
+        zones.append({
             "uid": zone.uid,
-            "status_reason": zone.status_reason
+            "status_reason": zone.status_reason,
+            "current_temperature": zone.current_temperature,
+            "effective_target_temperature": zone.effective_target_temperature,
+            "valve_command": zone.valve_command
         })
+
+    status["zones"] = zones
 
     return status

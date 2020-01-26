@@ -11,21 +11,15 @@
     .status-icon-ok {
         color: #5cb85c;
     }
-
-    .status-icon-warning {
-        color: #f0ad4e;
-    }
-
-    .status-icon-danger {
-        color: #d9534f;
-    }
-
+  
     .status-icon-default {
         color: lightgray;
     }
 </style>
 
-<span class="status-icon pull-left fas fa-square-full" ng-class="component.getStatus('roller_shutter.position')===100 ? 'status-icon-ok' : 'status-icon-default'"><span> {{component.getStatus('roller_shutter.position', 0)}} %</span></span>
+<span class="status-icon pull-left fas fa-square-full" ng-class="component.getStatus('roller_shutter.position')===100 ? 'status-icon-ok' : 'status-icon-default'">
+    <span class="wh-status-text wh-text-info"> {{component.getStatus('roller_shutter.position', 0)}} %</span>
+</span>
 
 <div class="btn-group pull-right">
     <button class="btn rs-btn" ng-class="component.getStatus('roller_shutter.state')==='moving_up' ? 'btn-danger' : 'btn-default'"

@@ -53,6 +53,8 @@ function createAppController($http, $scope, apiService, localizationService, com
     };
 
     c.applyNewStatus = function (status) {
+        c.status = status;
+
         if (c.isConfigured !== true) {
             console.log("Building UI...");
             localizationService.load(status.globalVariables["system.language_code"]);
@@ -142,7 +144,6 @@ function createAppController($http, $scope, apiService, localizationService, com
                 c.setActivePanel(c.componentGroups[0].uid);
             }
 
-            c.status = status;
             c.panels = status.panels;
             c.panels.push({
                 uid: "componentGroups",

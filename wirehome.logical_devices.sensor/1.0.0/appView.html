@@ -1,36 +1,22 @@
 <style>
     .sensor-value {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 1.5em;
-        float: right
+        font-size: 24px;
+        float: right;
     }
 
     .sensor-status-text {
-        font-size: 16px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .sensor-status-text-ok {
-        color: #3c763d;
-    }
-
-    .sensor-status-text-warning {
-        color: #f0ad4e;
-    }
-
-    .sensor-status-text-danger {
-        color: #d9534f;
+        font-size: 16px;   
     }
 </style>
 
 <div ng-if="component.hasStatus('humidity.value')">
     <span ng-if="component.getStatus('humidity.value')>=component.getSetting('app.humidity.danger_value', 75)"
-        class="sensor-status-text sensor-status-text-danger">Warning!</span>
+        class="sensor-status-text wh-text-danger">Warning!</span>
     <span
         ng-if="component.getStatus('humidity.value')>=component.getSetting('app.humidity.warning_value', 60) && component.getStatus('humidity.value')<component.getSetting('app.humidity.danger_value', 60)"
-        class="sensor-status-text sensor-status-text-warning">Warning!</span>
+        class="sensor-status-text wh-text-warning">Warning!</span>
     <span ng-if="component.getStatus('humidity.value')<component.getSetting('app.humidity.warning_value', 60)"
-        class="sensor-status-text sensor-status-text-ok">OK</span>
+        class="sensor-status-text wh-text-info">OK</span>
 
     <span class="sensor-value">{{(component.getStatus('humidity.value') | number:0) + ' % r.F.'}}</span>
 </div>
