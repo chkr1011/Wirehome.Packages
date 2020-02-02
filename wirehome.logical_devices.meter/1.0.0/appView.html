@@ -1,13 +1,11 @@
 <style>
     .meter-value {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 16px;
+        font-size: 24px;
         float: right;
     }
 
-    .status-icon {
-        font-size: 18px;
-        margin-right: 10px;
+    .meter-status-text {
+        font-size: 16px;
     }
 
     .status-icon-warning {
@@ -17,22 +15,19 @@
     .status-icon-default {
         color: lightgray;
     }
-
-    .last-activity-text {
-        color: lightgray;
-    }
 </style>
 
 <div>
     <span class="pull-left">
-        <span class="status-icon fas fa-burn"
+        <span class="wh-status-icon fas fa-burn"
             ng-class="component.getStatus('meter.is_active')===true ? 'status-icon-warning' : 'status-icon-default'"></span>
-        <span
-            class="last-activity-text">{{component.getStatus('meter.last_activity') | date : 'dd.MM HH:mm:ss' }}</span>
+        </br>
+        <span class="wh-text-dimmed wh-status-text-small">Last activity:
+            {{component.getStatus('meter.last_activity') | date : 'dd.MM HH:mm:ss' }}</span>
     </span>
 </div>
 
-<div>
-    <span
+<div class="pull-right">
+    <span 
         class="meter-value">{{component.getStatus('meter.value') + ' ' + component.getConfiguration("unit", "?")}}</span>
 </div>

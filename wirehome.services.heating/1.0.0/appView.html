@@ -1,32 +1,38 @@
 <style>
     .key {
         font-weight: bold;
-        margin-left: 1em;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+
+    .value {
+        font-size: 14px;
+        margin-left: 10px;
     }
 </style>
 
-<div id="panel-heating" class="row panel panel-active" style="background: white;">
-    <div class="panel-heading panel-active pointer clearfix" ng-click="ctrl.setActivePanel('heating')">
+<div id="panel-heating" class="wh-panel row">
+    <div class="wh-panel-header wh-panel-header-active clearfix" ng-click="ctrl.setActivePanel('heating')">
         <span class="panel-title pull-left">Heating</span>
     </div>
 
-    <div class="container-fluid">
+    <div class="wh-panel-content">
         <table>
             <tr ng-repeat="zone in ctrl.status['heating']['zones']">
-                <td><span>{{zone.uid}}</span></td>
-                <td><span class="key">CT=</span>{{zone.current_temperature}}</td>
-                <td><span class="key">TT=</span>{{zone.effective_target_temperature}}</td>
-                <td><span class="key">VC=</span>{{zone.valve_command}}</td>
+                <td><span class="key">{{zone.uid}}</span></td>
+                <td><span class="key">CT=</span><span class="value">{{zone.current_temperature}}</span></td>
+                <td><span class="key">TT=</span><span class="value">{{zone.effective_target_temperature}}</span></td>
+                <td><span class="key">VC=</span><span class="value">{{zone.valve_command}}</span></td>
 
                 <tr>
                     <td colspan="2">
-                        <span><b>{{zone.status_reason}}</b></span>
+                        <span class="value"><b>{{zone.status_reason}}</b></span>
                     </td>
                     <td></td>
                 </tr>
             </tr>
         </table>
-        <div><span>Last update=</span>{{ctrl.status["heating"]["last_update"]}}</div>
-        <div><span>Enabled=</span>{{ctrl.status["heating"]["is_enabled"]}}</div>
+        <div><span class="key">Last update =</span><span class="value">{{ctrl.status["heating"]["last_update"]}}</span></div>
+        <div><span class="key">Enabled =</span><span class="value">{{ctrl.status["heating"]["is_enabled"]}}</span></div>
     </div>
 </div>

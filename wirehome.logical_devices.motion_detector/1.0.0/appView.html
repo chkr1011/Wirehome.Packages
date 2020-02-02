@@ -1,9 +1,4 @@
 <style>
-    .status-icon {
-        font-size: 18px;
-        margin-right: 10px;
-    }
-
     .status-icon-ok {
         color: #5cb85c;
     }
@@ -22,10 +17,10 @@
 </style>
 
 <div>
-    <span class="pull-left status-icon">
-        <span class="status-icon fas fa-dot-circle"
+    <span class="pull-left">
+        <span class="wh-status-icon fas fa-dot-circle"
             ng-class="component.getStatus('motion_detection.state')==='detected' ? 'status-icon-danger' : 'status-icon-default'"></span>
-        <span class="fas fa-recycle"
+        <span class="wh-status-icon fas fa-recycle"
             ng-class="component.getSetting('auto_activate.is_enabled')===true ? 'status-icon-ok' : 'status-icon-default'"></span>
         </br>
         <span
@@ -34,12 +29,12 @@
 </div>
 
 <div class="input-group pull-right">
-    <button class="btn action-button"
+    <button class="btn wh-action-button"
         ng-class="component.getSetting('is_enabled', true)===true ? 'btn-success' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'enable'})">
         ON
     </button>
-    <button href="#" class="btn action-button"
+    <button href="#" class="btn wh-action-button"
         ng-class="component.getSetting('is_enabled', true)===false ? 'btn-danger' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'disable'})">
         OFF

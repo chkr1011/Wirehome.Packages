@@ -16,7 +16,7 @@
         <div class="wh-component-panel" ng-repeat="component in componentGroup.components">
             <span class="wh-component-caption">
                 <span class="wh-component-icon" ng-class="component.getSetting('app.image_id', 'fas fa-question')"
-                    ng-style="{color: component.getSetting('app.image_color', '#007ACC')}"></span>
+                    ng-style="{color: component.getSetting('app.image_color', '#1976D2')}"></span>
                 <span>
                     {{component.getSetting("app.caption", "#" + component.uid)}}
                 </span>
@@ -45,7 +45,7 @@
 
             <div class="clearfix" style="padding-top: 10px;" ng-include="component.viewSource"></div>
 
-            <div class="clearfix22" style="height: 28px;">
+            <div style="height: 28px;">
 
                 <span ng-if="component.getSetting('is_enabled', true) == false"
                     class="wh-status-text wh-text-danger">

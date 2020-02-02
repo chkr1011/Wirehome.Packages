@@ -1,6 +1,6 @@
 <div class="input-group pull-right">
-    <button class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
+    <button class="btn wh-action-button" ng-class="component.getStatus('power.state')==='on' ? 'btn-danger' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_on'})">ON</button>
-    <button class="btn btn-outline-secondary" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
+    <button class="btn wh-action-button" ng-class="component.getStatus('power.state')==='off' ? 'btn-success' : 'btn-default'"
         ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'turn_off'})">OFF</button>
 </div>

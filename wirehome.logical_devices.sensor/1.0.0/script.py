@@ -68,6 +68,8 @@ def __set_sensor_value__(value):
         wirehome.component.set_status("humidity.value", value)
     elif sensor_type == "pressure":
         wirehome.component.set_status("pressure.value", value)
+    elif sensor_type == "custom":
+        wirehome.component.set_status("sensor.value", value)
 
     wirehome.component.set_status("status.is_outdated", False)
     __start_outdated_countdown__()

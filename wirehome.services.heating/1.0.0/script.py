@@ -205,7 +205,7 @@ def __fill_target_temperature__(zone):
     if zone.affected_mode != None:
         zone.effective_target_temperature = zone.affected_mode.get("target_temperature", 16)
 
-    low_delta = zone.config.get("low_delta", 0.3)
+    low_delta = zone.config.get("low_delta", 0.1)
     zone.low_delta_temperature = zone.effective_target_temperature - low_delta
 
     high_delta = zone.config.get("high_delta", 0.1)

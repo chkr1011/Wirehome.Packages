@@ -28,3 +28,7 @@
 <div ng-if="component.hasStatus('pressure.value')">
     <span class="sensor-value">{{(component.getStatus('pressure.value') | number:0) + ' hPa'}}</span>
 </div>
+
+<div ng-if="component.hasStatus('sensor.value')">
+    <span class="sensor-value">{{(component.getStatus('sensor.value'))}}</span>
+</div>

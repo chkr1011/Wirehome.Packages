@@ -5,10 +5,6 @@
     border: 0;
 }
 
-.panel-active {
-    background: #427AB6;
-}
-
 .panel-heading {
     background-image: none !important;
     color: whitesmoke;
@@ -47,9 +43,7 @@
     border: 0 !important;
 }
 
-.action-button {
-    min-width: 60px;
-}
+
 
 * {
     border-radius: 0 !important;
@@ -59,7 +53,7 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 2pt;
-    background: #2D2D2D;
+    background: #424242;
 }
 
 /* Custom styles */
@@ -71,7 +65,7 @@ body {
 }
 
 .wh-text-info {
-    color: #28A745;
+    color: #2E7D32;
 }
 
 .wh-text-warning {
@@ -79,45 +73,51 @@ body {
 }
 
 .wh-text-danger {
-    color: #D9534F;
+    color: #B00020;
 }
 
 /* Panels */
 
-.wh-component-panel {
-    background: #2D2D2D;
-    padding: 10px;
+.wh-panel {
+    background: #424242;
     color: white;
-    border-style: solid;
-    border-bottom-width: 1px;
-    border-right-width: 0px;
-    border-left-width: 0px;
-    border-top-width: 0px;
-    border-color: #1E1E1E;
 }
 
 .wh-panel-header {
     color: white;
+    cursor: pointer;
     padding: 10px;
-    border-style: solid;
-    border-bottom-width: 1px;
-    border-right-width: 0px;
-    border-left-width: 0px;
-    border-top-width: 0px;
-    border-color: #1E1E1E;
+}
+
+.wh-panel-header-active {
+    background: #1976D2;
+    color: white;
+}
+
+.wh-panel-header-inactive {
+    background: #2D2D2D;
 }
 
 .wh-panel-header-caption {
     font-size: 16px;
 }
 
-.wh-panel-header-active {
-    background: #007ACC;
-    color: white;
+.wh-panel-content {
+    margin: 10px;
 }
 
-.wh-panel-header-inactive {
-    background: #2D2D2D;
+/* Components */
+
+.wh-component-panel {
+    background: #424242;
+    padding: 10px;
+    color: white;
+    border-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    border-top-width: 0px;
+    border-color: #212121;
 }
 
 .wh-component-caption {
@@ -132,6 +132,12 @@ body {
 /* Status */
 .wh-status-text-small {
     font-size: 11px;
+}
+
+.wh-status-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
 
 .wh-status-text {
@@ -163,7 +169,9 @@ body {
     background: #D9534F;
 }
 
-
+.wh-action-button {
+    min-width: 60px;
+}
 
 
 

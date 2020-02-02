@@ -82,20 +82,20 @@
     <div class="container-fluid" id="content" ng-show="ctrl.isInitialized">
         <div ng-include="'views/notificationsContainerTemplate.html'"></div>
 
-        <div ng-repeat="panel in ctrl.panels | orderBy:['positionIndex']" ng-include="panel.viewSource"></div>
+        <div  ng-repeat="panel in ctrl.panels | orderBy:['positionIndex']" ng-include="panel.viewSource"></div>
 
         <div ng-include="'views/footerContainerTemplate.html'"></div>
     </div>
 
-    <link rel="stylesheet" type="text/css" href="contents/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="contents/bootstrap-theme.min.css">
-    <link rel="stylesheet" type="text/css" href="contents/custom-style.css">
-    <link rel="stylesheet" type="text/css" href="fonts/fontawesome/css/all.min.css">
-
-    <script type="text/javascript" src="scripts/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="scripts/bootstrap.min.js"></script>
-    <script type="text/javascript" src="scripts/angular.min.js"></script>
-    <script type="text/javascript" src="scripts/angular-extensions.js"></script>
+    <link rel="stylesheet" type="text/css" href="libs/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    
+    <script type="text/javascript" src="libs/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="libs/bootstrap.min.js"></script>
+    <script type="text/javascript" src="libs/angular.min.js"></script>
+    <script type="text/javascript" src="libs/angular-extensions.js"></script>
 
     <script type="text/javascript" src="services/apiService.js"></script>
     <script type="text/javascript" src="services/localizationService.js"></script>
@@ -107,9 +107,9 @@
     <script type="text/javascript" src="appController.js"></script>
     <script type="text/javascript" src="module.js"></script>
 
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
         history.replaceState(null, null, window.location.pathname);
-    </script>
+    </script> -->
 </body>
 
 </html>

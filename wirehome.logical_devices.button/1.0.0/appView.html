@@ -15,15 +15,15 @@
         ng-class="component.getStatus('button.state')==='pressed' ? 'wh-text-danger' : 'wh-text-dimmed'"></span>
 
     <div class="input-group pull-right">
-        <button class="btn action-button"
+        <button class="btn wh-action-button"
             ng-class="component.getSetting('is_enabled', true)===true ? 'btn-success' : 'btn-default'"
             ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'enable'})">
-            ACTIVE
+            ON
         </button>
-        <button class="btn action-button"
+        <button class="btn wh-action-button"
             ng-class="component.getSetting('is_enabled', true)===false ? 'btn-danger' : 'btn-default'"
             ng-click="ctrl.componentService.sendMessage(component.uid, {'type':'disable'})">
-            INACTIVE
+            OFF
         </button>
     </div>
 </div>
