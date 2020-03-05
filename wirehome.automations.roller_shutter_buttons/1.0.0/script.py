@@ -1,4 +1,5 @@
 config = {}
+subscriptions = []
 
 
 def process_logic_message(message):
@@ -40,6 +41,7 @@ def __attach_button__(uid):
     }
 
     subscription_uid = wirehome.context["component_uid"] + ":status_changed->" + uid
+
     wirehome.message_bus.subscribe(subscription_uid, filter, __button_callback__)
 
     global subscriptions
@@ -52,6 +54,7 @@ def __button_callback__(message):
     down_button_uid = config["down_button"]
 
     component_uid = message["component_uid"]
+
     up_is_pressed = component_uid == up_button_uid
     down_is_pressed = component_uid == down_button_uid
 

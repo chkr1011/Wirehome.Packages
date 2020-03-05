@@ -14,6 +14,12 @@ BOARD_HS_PE_8_OUT = "HSPE8-OUT"
 BOARD_HS_RB_16 = "HSRB16"
 
 config = {}
+is_running = False
+message_bus_subscription = None
+output_devices = []
+devices = {}
+devices_with_interrupt_polling = []
+devices_with_state_polling = []
 
 
 class Device:
@@ -68,13 +74,16 @@ def start():
 
     global message_bus_subscription
     uid = "wirehome.cc_tools.board_manager.gpio_state_changed"
-    message_bus_subscription = wirehome.message_bus.subscribe(uid, filter, __handle_interrupt__)
+    message_bus_subscription = wirehome.message_bus.subscribe(
+        uid, filter, __handle_interrupt__)
 
     if len(devices_with_state_polling) > 0:
-        wirehome.scheduler.start_thread("cc_tools.board_manager.poll_states", __poll_states_thread__)
+        wirehome.scheduler.start_thread(
+            "cc_tools.board_manager.poll_states", __poll_states_thread__)
 
     if len(devices_with_interrupt_polling) > 0:
-        wirehome.scheduler.start_thread("cc_tools.board_manager.poll_interrupts", __poll_interrupts_thread__)
+        wirehome.scheduler.start_thread(
+            "cc_tools.board_manager.poll_interrupts", __poll_interrupts_thread__)
 
 
 def stop():
@@ -203,7 +212,8 @@ def __write__state__(device):
 
 
 def __write_pcf8574__(device):
-    wirehome.i2c.write_as_ulong(device.bus_id, device.address, device.buffer, 1)
+    wirehome.i2c.write_as_ulong(
+        device.bus_id, device.address, device.buffer, 1)
 
 
 def __write_max7311__(device):
@@ -263,7 +273,8 @@ def __update_shared_relay__(changed_device, shared_relay):
     if shared_relay_state.get("relay_state", None) == new_shared_relay_state:
         return
 
-    print("Updating shared relay state {x} to {y}.".format(x=shared_relay_state.get("relay_state", ""), y=new_shared_relay_state))
+    print("Updating shared relay state {x} to {y}.".format(
+        x=shared_relay_state.get("relay_state", ""), y=new_shared_relay_state))
     print(shared_relay_state)
 
     set_state({
@@ -322,7 +333,8 @@ def __initialize_device__(device_uid, config):
         device.address = config["address"]
         device.fetch_mode = config.get("fetch_mode", "")
         device.buffer = config.get("initial_state", 0)
-        device.interrupt_gpio_host_id = config.get("interrupt_gpio_host_id", "")
+        device.interrupt_gpio_host_id = config.get(
+            "interrupt_gpio_host_id", "")
         device.interrupt_gpio_id = config.get("interrupt_gpio_id", None)
 
         global devices_with_interrupt_polling
@@ -330,10 +342,12 @@ def __initialize_device__(device_uid, config):
 
         if device.fetch_mode == "interrupt":
             if device.interrupt_gpio_id != None:
-                wirehome.gpio.enable_interrupt(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
+                wirehome.gpio.enable_interrupt(
+                    device.interrupt_gpio_host_id, device.interrupt_gpio_id)
         elif device.fetch_mode == "poll_interrupt":
             if device.interrupt_gpio_id != None:
-                wirehome.gpio.set_direction(device.interrupt_gpio_host_id, device.interrupt_gpio_id, "in")
+                wirehome.gpio.set_direction(
+                    device.interrupt_gpio_host_id, device.interrupt_gpio_id, "in")
                 devices_with_interrupt_polling.append(device)
         elif device.fetch_mode == "poll_state":
             devices_with_state_polling.append(device)
@@ -360,7 +374,8 @@ def __initialize_device__(device_uid, config):
 
         wirehome.log.information("Initialized device " + device.uid)
     except Exception as ex:
-        wirehome.log.error("Initializing device " + device.uid + " failed. " + ex.message + " (" + str(type(ex)) + ").")
+        wirehome.log.error("Initializing device " + device.uid +
+                           " failed. " + ex.message + " (" + str(type(ex)) + ").")
 
 
 def __initialize_input_hspe16__(device):
@@ -398,10 +413,12 @@ def __poll_interrupts_thread__(_):
         gpio_states = {}
 
         for device in devices_with_interrupt_polling:
-            gpio_key = device.interrupt_gpio_host_id + str(device.interrupt_gpio_id)
+            gpio_key = device.interrupt_gpio_host_id + \
+                str(device.interrupt_gpio_id)
 
             if not gpio_key in gpio_states:
-                gpio_states[gpio_key] = wirehome.gpio.read_state(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
+                gpio_states[gpio_key] = wirehome.gpio.read_state(
+                    device.interrupt_gpio_host_id, device.interrupt_gpio_id)
 
             if gpio_states[gpio_key] == "low":
                 __poll_state__(device)
@@ -421,9 +438,11 @@ def __poll_state__(device):
     if device.board == BOARD_HS_PE_16_IN:
         # Set target register to INPUT-0 register and read two register bytes (INPUT-0 and INPUT-1)
         write_buffer = 0x0
-        new_state = wirehome.i2c.write_read_as_ulong(device.bus_id, device.address, write_buffer, 1, 2)
+        new_state = wirehome.i2c.write_read_as_ulong(
+            device.bus_id, device.address, write_buffer, 1, 2)
     elif device.board == BOARD_HS_PE_8_IN:
-        new_state = wirehome.i2c.read_as_ulong(device.bus_id, device.address, 1)
+        new_state = wirehome.i2c.read_as_ulong(
+            device.bus_id, device.address, 1)
 
     if new_state == None:
         return

@@ -1,4 +1,5 @@
 import os
+import json
 
 
 def initialize():
@@ -51,7 +52,7 @@ def __update_configuration__():
     filename = os.path.expanduser("~/.homebridge/config.json")
     file = open(filename, "w")
     try:
-        file.write(wirehome.json_serializer.serialize_indented(configuration))
+        file.write(json.dumps(configuration))
     except:
         file.close()
 

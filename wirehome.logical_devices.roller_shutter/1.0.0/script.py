@@ -1,3 +1,13 @@
+class PositionTrackerStatus:
+    current_position = 0
+    position_tracker_max = None
+    position_tracker_current = 0
+    target_position = None
+
+config = {}
+position_tracker_status = PositionTrackerStatus()
+current_state = None
+
 def process_logic_message(message):
     type = message.get("type", None)
 
@@ -24,20 +34,18 @@ def process_adapter_message(message):
 
 
 def __initialize__(message):
-    global current_position
-    current_position = 0
-    global target_position
-    target_position = None
-    global current_state
-    current_state = "unknown"
-    global position_tracker_current
-    position_tracker_current = 0
-    global position_tracker_max
-    position_tracker_max = globals().get("config", {}).get("max_position", 0)
+    global position_tracker_status
+    position_tracker_status.current_position = None
+    position_tracker_status.position_tracker_current = None
+    position_tracker_status.target_position = None
+    position_tracker_status.position_tracker_max = config.get("max_position", None)
 
-    wirehome.component.set_status("roller_shutter.state", "unknown")
-    wirehome.component.set_status("roller_shutter.position", "unknown")
-    wirehome.component.set_status("power.state", "unknown")
+    global current_state
+    current_state = None
+
+    wirehome.component.set_status("roller_shutter.state", current_state)
+    wirehome.component.set_status("roller_shutter.position", None)
+    wirehome.component.set_status("power.state", None)
     wirehome.component.set_status("power.consumption", None)
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
@@ -48,21 +56,18 @@ def __initialize__(message):
     if adapter_result.get("type", None) != "success":
         return adapter_result
 
-    if position_tracker_max > 0:
-        component_uid = wirehome.context["component_uid"]
-        timer_uid = "wirehome.logic.roller_shutter.position_tracker:" + component_uid
-        wirehome.scheduler.attach_to_default_timer(timer_uid, __position_tracker_callback__)
-
     return __set_state__("turn_off")
 
 
-def __set_state__(state):
+def __set_state__(command):
+    # Skip if roller shutter is disabled.
     is_enabled = wirehome.component.get_setting("is_enabled", True)
     if not is_enabled:
         return wirehome.response_creator.disabled()
 
+    # Perform requested operation at adapter level.
     adapter_result = wirehome.publish_adapter_message({
-        "type": state
+        "type": command
     })
 
     if adapter_result.get("type", None) != "success":
@@ -72,43 +77,43 @@ def __set_state__(state):
     power_consumption = adapter_result.get("power.consumption", None)
 
     if power_consumption == None:
-        power_consumption = globals().get("config", {}).get("static_power_consumption", None)
+        power_consumption = config.get("static_power_consumption", None)
 
     global current_state
+    global position_tracker_status
 
-    if state == "turn_off":
-        wirehome.component.set_status("roller_shutter.state", "off")
-        wirehome.component.set_status("power.state", "off")
+    final_state = "off"
+    final_power_state = "off"
+    final_power_consumption = power_consumption
 
+    if command == "turn_off":
         if power_consumption != None:
             # Set 0 because the roller shutter is off. The real value is only used when
             # the roller shutter is moving into any direction.
-            wirehome.component.set_status("power.consumption", 0)
+            final_power_consumption = 0
 
-        current_state = "off"
+    elif command == "move_up":
+        final_state = "moving_up"
+        final_power_state = "on"
 
-    if state == "move_up":
-        wirehome.component.set_status("roller_shutter.state", "moving_up")
-        wirehome.component.set_status("power.state", "on")
+    elif command == "move_down":
+        final_state = "moving_down"
+        final_power_state = "on"
 
-        if power_consumption != None:
-            wirehome.component.set_status("power.consumption", power_consumption)
+    # START POSITION TRACKING TIMER.
+    #component_uid = wirehome.context["component_uid"]
+    #timer_uid = "wirehome.logic.roller_shutter.position_tracker:" + component_uid
+    #if final_power_state == "on" and position_tracker_status.position_tracker_max != None:
+    #    wirehome.scheduler.start_timer(timer_uid, 100, __position_tracker_callback__)
+    #else:
+    #    wirehome.scheduler.stop_timer(timer_uid)
 
-        start_auto_off_countdown = True
-        current_state = "moving_up"
+    wirehome.component.set_status("roller_shutter.state", final_state)
+    wirehome.component.set_status("power.state", final_power_state)
+    wirehome.component.set_status("power.consumption", final_power_consumption)
 
-    if state == "move_down":
-        wirehome.component.set_status("roller_shutter.state", "moving_down")
-        wirehome.component.set_status("power.state", "on")
-
-        if power_consumption != None:
-            wirehome.component.set_status("power.consumption", power_consumption)
-
-        start_auto_off_countdown = True
-        current_state = "moving_down"
-
-    auto_off_timeout = globals().get("config", {}).get("auto_off_timeout", 60000)
-    start_auto_off_countdown = state == "move_up" or state == "move_down"
+    auto_off_timeout = config.get("auto_off_timeout", 60000)
+    start_auto_off_countdown = final_state != "off"
 
     if start_auto_off_countdown == True and auto_off_timeout != None:
         countdown_uid = wirehome.context["component_uid"] + ".auto_off"
@@ -122,35 +127,39 @@ def __auto_off_callback__(_):
 
 
 def __set_position__(message):
-    global target_position
-    target_position = message.get("position", 0)
+    global position_tracker_status
+    position_tracker_status.target_position = message.get("position", 0)
 
-    if target_position > current_position:
+    if position_tracker_status.target_position > position_tracker_status.current_position:
         return __set_state__("move_down")
-    elif target_position < current_position:
+    elif position_tracker_status.target_position < position_tracker_status.current_position:
         return __set_state__("move_up")
 
 
 def __position_tracker_callback__(parameters):
-    if current_state == "off":
+    if current_state != "moving_up" and current_state != "moving_down":
         return
 
     elapsed_time = parameters["elapsed_millis"]
 
-    global position_tracker_current
+    global position_tracker_status
 
     if current_state == "moving_up":
-        position_tracker_current -= elapsed_time
+        position_tracker_status.position_tracker_current -= elapsed_time
     elif current_state == "moving_down":
-        position_tracker_current += elapsed_time
+        position_tracker_status.position_tracker_current += elapsed_time
 
-    if position_tracker_current < 0:
+    if position_tracker_status.position_tracker_current < 0:
         position_tracker_current = 0
-    elif position_tracker_current > position_tracker_max:
-        position_tracker_current = position_tracker_max
+    elif position_tracker_current > position_tracker_status.position_tracker_max:
+        position_tracker_current = position_tracker_status.position_tracker_max
 
-    global current_position
-    current_position = (position_tracker_current * 100) / position_tracker_max
+    new_current_position = (position_tracker_current * 100) / position_tracker_status.position_tracker_max
+
+    if position_tracker_status.current_position == new_current_position:
+        return
+
+    current_position = new_current_position
 
     if current_position > 100:
         current_position = 100

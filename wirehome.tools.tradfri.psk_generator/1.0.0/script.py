@@ -1,3 +1,6 @@
+import json
+
+
 def main(parameters):
     gateway_address = parameters.get("gateway_address", None)
     security_code = parameters.get("security_code", None)
@@ -28,10 +31,10 @@ def main(parameters):
             "message": "The specified identity is already used. Please use a new one."
         }
 
-    json = wirehome.json_serializer.deserialize_json(gateway_result)
+    result = json.loads(gateway_result)
 
-    psk = json.get("9091", None)
-    version = json.get("9029", None)
+    psk = result.get("9091", None)
+    version = result.get("9029", None)
 
     if psk == None or version == None:
         return process_result

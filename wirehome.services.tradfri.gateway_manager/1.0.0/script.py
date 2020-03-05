@@ -4,7 +4,10 @@ config = {}
 
 from time import sleep
 import sys
+import json
 
+_devices = {}
+_gateway_is_connected = False
 
 def initialize():
     # wirehome.debugger.enable()
@@ -62,7 +65,7 @@ def set_device_status(status):
 
     data = {"3311": [data]}
 
-    payload = wirehome.json_serializer.serialize(data)
+    payload = json.dumps(data)
 
     return __execute_coap_request__("put", uri, payload)
 
@@ -76,11 +79,11 @@ def __poll_status__(_):
 
         response = __execute_coap_request__("get", "15001")
         device_ids = response["output_data"]
-        device_ids = wirehome.json_serializer.deserialize(device_ids)
+        device_ids = json.loads(device_ids)
 
         for device_id in device_ids:
             response = __execute_coap_request__("get", "15001/" + str(device_id))
-            new_devices[device_id] = wirehome.json_serializer.deserialize(response["output_data"])
+            new_devices[device_id] = json.loads(response["output_data"])
 
         _gateway_is_connected = True
         __fire_events__(_devices, new_devices)
@@ -165,7 +168,7 @@ def __execute_coap_request__(method, uri, payload=""):
         escapedPayload,
         uri)
 
-    wirehome.debugger.trace(arguments)
+    #wirehome.debugger.trace(arguments)
 
     parameters = {
         "file_name": "/bin/bash",

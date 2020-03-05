@@ -31,6 +31,7 @@ def __on_state_changed__(message):
     if new_state == "pressed":
         if wirehome.component.get_setting("is_enabled", True) != False:
             wirehome.component.set_status("button.state", "pressed")
+
             wirehome.scheduler.start_countdown(countdown_uid, long_press_max_duration, __send_triggered_long_event__)
     elif new_state == "released":
         wirehome.component.set_status("button.state", "released")
@@ -43,9 +44,7 @@ def __on_state_changed__(message):
             "new_state": new_state
         }
 
-    return {
-        "type": "success"
-    }
+    return wirehome.response_creator.success()
 
 
 def __send_triggered_long_event__(_):

@@ -4,13 +4,6 @@ config = {}
 
 
 def process_adapter_message(properties):
-    """
-        Processes incoming messages from the ventilation component logic.
-
-        Args:
-            properties : {} = The properties of the message.
-    """
-
     type = properties["type"]
 
     if type == "initialize":

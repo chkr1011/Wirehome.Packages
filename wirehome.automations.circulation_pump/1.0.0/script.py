@@ -1,7 +1,9 @@
 import datetime
 
 config = {}
-
+pump_last_turned_on = None
+countdown_uid = None
+subscriptions = None
 
 def process_logic_message(message):
     type = message.get("type", None)
