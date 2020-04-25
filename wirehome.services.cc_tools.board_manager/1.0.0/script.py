@@ -374,8 +374,7 @@ def __initialize_device__(device_uid, config):
 
         wirehome.log.information("Initialized device " + device.uid)
     except Exception as ex:
-        wirehome.log.error("Initializing device " + device.uid +
-                           " failed. " + ex.message + " (" + str(type(ex)) + ").")
+        wirehome.log.error("Initializing device '{}' failed. {} ({})".format(device.uid, ex.message, str(type(ex))))
 
 
 def __initialize_input_hspe16__(device):
