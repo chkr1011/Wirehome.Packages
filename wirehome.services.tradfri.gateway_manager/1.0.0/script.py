@@ -67,7 +67,12 @@ def set_device_status(status):
 
     payload = json.dumps(data)
 
-    return __execute_coap_request__("put", uri, payload)
+    response = __execute_coap_request__("put", uri, payload)
+
+    if response["status"] == "Changed":
+        return {"type": "success"}
+    
+    return {"type": response["status"]}
 
 
 def __poll_status__(_):
@@ -78,12 +83,12 @@ def __poll_status__(_):
         new_devices = {}
 
         response = __execute_coap_request__("get", "15001")
-        device_ids = response["output_data"]
+        device_ids = response["payload"]
         device_ids = json.loads(device_ids)
 
         for device_id in device_ids:
             response = __execute_coap_request__("get", "15001/" + str(device_id))
-            new_devices[device_id] = json.loads(response["output_data"])
+            new_devices[device_id] = json.loads(response["payload"])
 
         _gateway_is_connected = True
         __fire_events__(_devices, new_devices)
@@ -158,25 +163,16 @@ def __execute_coap_request__(method, uri, payload=""):
     identity = config.get("identity", "wirehome")
     psk = config.get("psk", None)
 
-    uri = "coaps://{a}:5684/{u}".format(a=address, u=uri)
-
-    escapedPayload = payload.replace('"', '""')
-    arguments = '-c "coap-client -m {} -u "{}" -k "{}" -e \'{}\' "{}""'.format(
-        method,
-        identity,
-        psk,
-        escapedPayload,
-        uri)
-
-    #wirehome.debugger.trace(arguments)
-
-    parameters = {
-        "file_name": "/bin/bash",
-        "arguments": arguments,
-        "timeout": 1000
+    request = {
+        "client_uid": "tradfri_gateway_manager",
+        "host": address,
+        "identity": identity,
+        "key": psk,
+        "method": method,
+        "path": uri,
+        "payload": payload
     }
 
-    execute_result = wirehome.os.execute(parameters)
-    execute_result["arguments"] = arguments
-
-    return execute_result
+    response = wirehome.coap.request(request)
+    #print(response)
+    return response
