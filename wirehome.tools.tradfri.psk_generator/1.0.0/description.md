@@ -1,7 +1,11 @@
-# Summary
+# TRADFRI Gateway PSK Generator
+
+## Summary
+
 This tool generates a PSK for accessing a TRADFRI Gateway.
 
-# Parameters
+## Parameters
+
 The following parameters must be provided when executing this tool.
 
 ```json

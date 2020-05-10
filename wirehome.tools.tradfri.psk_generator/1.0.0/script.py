@@ -20,11 +20,12 @@ def main(parameters):
 
     payload = '{{"9090":"{identity}"}}'.format(identity=identity)
 
-    process_result = __execute_coap_request__(gateway_address, "post", "15011/9063", payload, "Client_identity", security_code)
-    if process_result.get("type", None) != "success" or process_result.get("exit_code", None) != 0:
-        return process_result
+    response = __execute_coap_request__(gateway_address, "post", "15011/9063", payload, security_code)
 
-    gateway_result = process_result["output_data"]
+    if response.get("type", None) != "success":
+        return response
+
+    gateway_result = response["payload"]
     if gateway_result == "":
         return {
             "type": "exception",
@@ -37,7 +38,7 @@ def main(parameters):
     version = result.get("9029", None)
 
     if psk == None or version == None:
-        return process_result
+        return response
 
     return {
         "type": "success",
@@ -47,24 +48,21 @@ def main(parameters):
     }
 
 
-def __execute_coap_request__(address, method, uri, payload, identity, psk):
-    uri = "coaps://{a}:5684/{u}".format(a=address, u=uri)
+def __execute_coap_request__(method, uri, payload, security_code):
+    address = config.get("gateway_address", None)
+    identity = config.get("identity", "wirehome")
+    psk = config.get("psk", None)
 
-    escapedPayload = payload.replace('"', '""')
-    arguments = '-c "coap-client -m {} -u "{}" -k "{}" -e \'{}\' "{}""'.format(
-        method,
-        identity,
-        psk,
-        escapedPayload,
-        uri)
-
-    parameters = {
-        "file_name": "/bin/bash",
-        "arguments": arguments,
-        "timeout": 1000
+    request = {
+        "client_uid": "tradfri_gateway_manager",
+        "host": address,
+        "identity": "Client_identity",
+        "key": security_code,
+        "method": method,
+        "path": uri,
+        "payload": payload
     }
 
-    execute_result = wirehome.os.execute(parameters)
-    execute_result["arguments"] = arguments
-
-    return execute_result
+    response = wirehome.coap.request(request)
+    # print(response)
+    return response

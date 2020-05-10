@@ -1,6 +1,7 @@
 import datetime
 
 config = {}
+auto_activate_countdown_uid = None
 
 
 def process_logic_message(message):

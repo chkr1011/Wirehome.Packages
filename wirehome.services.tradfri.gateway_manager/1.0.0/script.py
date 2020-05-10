@@ -93,9 +93,12 @@ def __poll_status__(_):
         _gateway_is_connected = True
         __fire_events__(_devices, new_devices)
         _devices = new_devices
-    except:
+    except :
         _gateway_is_connected = False
-        print("TRADFRI gateway pull failed. (Response=" + str(response) + ")")
+        exception = sys.exc_info()
+               
+        print("TRADFRI gateway pull failed. {} (Response={})".format(exception[0], str(response)))
+        print(str(exception))
         sleep(10)
 
 
