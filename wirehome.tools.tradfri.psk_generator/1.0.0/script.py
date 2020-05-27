@@ -1,10 +1,14 @@
 import json
+import uuid
 
 
 def main(parameters):
+    # Mandatory parameters
     gateway_address = parameters.get("gateway_address", None)
     security_code = parameters.get("security_code", None)
-    identity = parameters.get("identity", "wirehome")
+
+    # Optional parameters
+    identity = parameters.get("identity", str(uuid.uuid4()))
 
     if gateway_address == None:
         return {
@@ -20,7 +24,8 @@ def main(parameters):
 
     payload = '{{"9090":"{identity}"}}'.format(identity=identity)
 
-    response = __execute_coap_request__(gateway_address, "post", "15011/9063", payload, security_code)
+    response = __execute_coap_request__(
+        gateway_address, "post", "15011/9063", payload, security_code)
 
     if response.get("type", None) != "success":
         return response
@@ -40,22 +45,25 @@ def main(parameters):
     if psk == None or version == None:
         return response
 
+    # Store new values. The gateway manager will pull values from here.
+    wirehome.value_storage.write(
+        "ikea/tradfri/gateway/address", gateway_address)
+    wirehome.value_storage.write("ikea/tradfri/gateway/identity", identity)
+    wirehome.value_storage.write("ikea/tradfri/gateway/psk", psk)
+
     return {
         "type": "success",
+        "gateway_address": gateway_address,
         "identity": identity,
         "psk": psk,
         "version": version
     }
 
 
-def __execute_coap_request__(method, uri, payload, security_code):
-    address = config.get("gateway_address", None)
-    identity = config.get("identity", "wirehome")
-    psk = config.get("psk", None)
-
+def __execute_coap_request__(gateway_address, method, uri, payload, security_code):
     request = {
-        "client_uid": "tradfri_gateway_manager",
-        "host": address,
+        "client_uid": "None",
+        "host": gateway_address,
         "identity": "Client_identity",
         "key": security_code,
         "method": method,

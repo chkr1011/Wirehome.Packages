@@ -1,13 +1,14 @@
+import json
+import sys
+from time import sleep
 TIMER_ID = "wirehome.tradfri.gateway_manager.polling"
 
 config = {}
 
-from time import sleep
-import sys
-import json
 
 _devices = {}
 _gateway_is_connected = False
+
 
 def initialize():
     # wirehome.debugger.enable()
@@ -25,7 +26,7 @@ def stop():
     wirehome.scheduler.stop_timer(TIMER_ID)
 
 
-def get_debug_infomation(_):
+def get_service_status():
     return {
         "devices": _devices,
         "trace": wirehome.debugger.get_trace(),
@@ -44,7 +45,7 @@ def __find_device_id__(caption):
 def set_device_status(status):
     device_id = status.get("device_id", None)
     if device_id == None:
-        device_caption = status.get("device_id", None)
+        device_caption = status.get("device_caption", None)
         device_id = __find_device_id__(device_caption)
 
     if device_id == None:
@@ -71,7 +72,7 @@ def set_device_status(status):
 
     if response["status"] == "Changed":
         return {"type": "success"}
-    
+
     return {"type": response["status"]}
 
 
@@ -93,11 +94,12 @@ def __poll_status__(_):
         _gateway_is_connected = True
         __fire_events__(_devices, new_devices)
         _devices = new_devices
-    except :
+    except:
         _gateway_is_connected = False
         exception = sys.exc_info()
-               
-        print("TRADFRI gateway pull failed. {} (Response={})".format(exception[0], str(response)))
+
+        print("TRADFRI gateway pull failed. {} (Response={})".format(
+            exception[0], str(response)))
         print(str(exception))
         sleep(10)
 
@@ -147,6 +149,7 @@ def __get_device_status_value__(source, device_id, status_id):
         return None
 
     status = device.get("3311", None)
+
     if status == None:
         return None
 
@@ -162,9 +165,17 @@ def __get_device_status_value__(source, device_id, status_id):
 
 
 def __execute_coap_request__(method, uri, payload=""):
-    address = config.get("gateway_address", None)
-    identity = config.get("identity", "wirehome")
-    psk = config.get("psk", None)
+    # Get the gateway settings from the location where they are stored by the
+    # Tradfri PSK token generator.
+    address = wirehome.value_storage.read_string("ikea/tradfri/gateway/address")
+    identity = wirehome.value_storage.read_string("ikea/tradfri/gateway/identity")
+    psk = wirehome.value_storage.read_string("ikea/tradfri/gateway/psk")
+
+    if address == None or identity == None or psk == None:
+        return {
+            "type": "error",
+            "message": "IKEA tradfri gateway not configured."
+        }
 
     request = {
         "client_uid": "tradfri_gateway_manager",
@@ -177,5 +188,5 @@ def __execute_coap_request__(method, uri, payload=""):
     }
 
     response = wirehome.coap.request(request)
-    #print(response)
+    # print(response)
     return response
