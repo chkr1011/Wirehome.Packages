@@ -9,7 +9,9 @@ def process_logic_message(message):
     if type == "enable":
         return __enable__()
     if type == "disable":
-        return __disable__()
+        return __disable__(message)
+    if type == "stop_countdown":
+        return __stop_countdown__()
     else:
         return wirehome.response_creator.not_supported(type)
 
@@ -36,12 +38,15 @@ def __enable__():
         subscriptions.append(subscription_uid)
 
 
-def __disable__():
+def __disable__(message):
     global subscriptions
     for subscription_uid in subscriptions:
         wirehome.message_bus.unsubscribe(subscription_uid)
 
     subscriptions = []
+
+    if message.get("stop_countdown", False):
+        __stop_countdown__()
 
 
 def __motion_detector_callback__(properties):
@@ -84,6 +89,10 @@ def __set_lights_state__(state):
 def __restart_countdown__():
     duration = config.get("duration", 5000)
     wirehome.scheduler.start_countdown(countdown_uid, duration, __countdown_callback__)
+
+
+def __stop_countdown__():
+    wirehome.scheduler.stop_countdown(countdown_uid)
 
 
 def __skip_condition_is_match__(component_uid):

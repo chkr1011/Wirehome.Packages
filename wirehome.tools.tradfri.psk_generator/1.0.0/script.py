@@ -62,7 +62,7 @@ def main(parameters):
 
 def __execute_coap_request__(gateway_address, method, uri, payload, security_code):
     request = {
-        "client_uid": "None",
+        "client_uid": None,
         "host": gateway_address,
         "identity": "Client_identity",
         "key": security_code,

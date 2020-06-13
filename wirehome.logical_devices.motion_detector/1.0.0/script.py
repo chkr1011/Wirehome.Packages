@@ -1,7 +1,6 @@
 import datetime
 
 config = {}
-auto_activate_countdown_uid = None
 
 
 def process_logic_message(message):
@@ -14,7 +13,7 @@ def process_logic_message(message):
     if type == "enable":
         return __enable__()
     if type == "disable":
-        return __disable__()
+        return __disable__(message)
     else:
         return wirehome.response_creator.not_supported(type)
 
@@ -66,7 +65,7 @@ def __destroy__(message):
     })
 
 
-def __disable__():
+def __disable__(message):
     wirehome.component.set_setting("is_enabled", False)
 
     if wirehome.component.get_setting("auto_activate.is_enabled", False):

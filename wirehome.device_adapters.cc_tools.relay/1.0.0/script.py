@@ -28,13 +28,6 @@ def __initialize__():
 
 
 def __set_state__(message):
-    state = message.get("state", None)
-    if state != None:
-        if state == "on" or state == "closed" or state == "high":
-            return __set_state_internal__("closed")
-        else:
-            return __set_state_internal__("open")
-
     power_state = message.get("power_state", None)
     if power_state != None:
         if power_state == "on":
@@ -42,16 +35,24 @@ def __set_state__(message):
         else:
             return __set_state_internal__("open")
 
-        return {
-            "type": "exception.parameter_missing",
-            "parameter_name": "power_state"
-        }
+    # TODO: Remove when no longer called.
+    state = message.get("state", None)
+    if state != None:
+        if state == "on" or state == "closed" or state == "high":
+            return __set_state_internal__("closed")
+        else:
+            return __set_state_internal__("open")
+
+    return {
+        "type": "exception.parameter_missing",
+        "parameter_name": "power_state"
+    }
 
 
 def __set_state_internal__(state):
     try:
         for port in config.get("ports", []):
-            parameters = {
+            service_parameters = {
                 "device_uid": port["device_uid"],
                 "port": port["port"],
                 "is_inverted": port.get("is_inverted", False),
@@ -59,7 +60,7 @@ def __set_state_internal__(state):
                 "commit": False
             }
 
-            service_result = wirehome.services.invoke(SERVICE_ID, "set_state", parameters)
+            service_result = wirehome.services.invoke(SERVICE_ID, "set_state", service_parameters)
     finally:
         wirehome.services.invoke(SERVICE_ID, "commit_device_states")
 

@@ -4,6 +4,8 @@ _color = "#FFFFFF"
 _supports_brightness = False
 _supports_color = False
 
+config = {}
+
 
 def process_logic_message(message):
     type = message.get("type", None)
@@ -112,7 +114,8 @@ def __initialize__(message):
     })
 
     if adapter_result.get("type", None) != "success":
-        wirehome.log.warning("Initialization of lamp '{componentUid}' failed (Adapter result = {result}).".format(componentUid = wirehome.context["component_uid"], result = str(adapter_result)))
+        wirehome.log.warning("Initialization of lamp '{componentUid}' failed (Adapter result = {result}).".format(
+            componentUid=wirehome.context["component_uid"], result=str(adapter_result)))
         return adapter_result
 
     global _supports_brightness, _supports_color
@@ -142,7 +145,7 @@ def __set_state__():
     if not is_enabled:
         return wirehome.response_creator.disabled()
 
-    message = {
+    adapter_message = {
         "type": "set_state",
         "power_state": _power_state
     }
@@ -154,30 +157,26 @@ def __set_state__():
         elif _brightness < 0:
             _brightness = 0
 
-        message["brightness"] = _brightness
+        adapter_message["brightness"] = _brightness
 
     if _supports_color:
-        message["color"] = _color
+        adapter_message["color"] = _color
 
-    adapter_result = wirehome.publish_adapter_message(message)
+    adapter_result = wirehome.publish_adapter_message(adapter_message)
 
     if adapter_result.get("type", None) != "success" and adapter_result.get("type", None) != "exception.not_supported":
         return adapter_result
 
     skip_status_update = adapter_result.get("skip_status_update", False)
 
-    static_power_consumption = globals().get("config", {}).get("static_power_consumption", None)
+    static_power_consumption = config.get("static_power_consumption", None)
 
-    if _power_state == "on":
-        wirehome.publish_adapter_message({"type": "turn_on"})  # Only for backward compatibility.
+    power_consumption = 0
 
-        if static_power_consumption != None:
-            wirehome.component.set_status("power.consumption", static_power_consumption)
-    elif _power_state == "off":
-        wirehome.publish_adapter_message({"type": "turn_off"})  # Only for backward compatibility.
+    if _power_state == "on" and static_power_consumption != None:
+        power_consumption = static_power_consumption
 
-        if static_power_consumption != None:
-            wirehome.component.set_status("power.consumption", 0)
+    wirehome.component.set_status("power.consumption", power_consumption)
 
     if not skip_status_update:
         wirehome.component.set_status("power.state", _power_state)
