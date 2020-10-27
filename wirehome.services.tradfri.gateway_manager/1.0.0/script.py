@@ -69,11 +69,12 @@ def set_device_status(status):
     payload = json.dumps(data)
 
     response = __execute_coap_request__("put", uri, payload)
+    response_status = response.get("status", None)
 
-    if response["status"] == "Changed":
+    if response_status == "Changed":
         return {"type": "success"}
 
-    return {"type": response["status"]}
+    return response
 
 
 def __poll_status__(_):
