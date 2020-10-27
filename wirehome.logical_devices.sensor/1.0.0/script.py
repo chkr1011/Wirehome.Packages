@@ -15,6 +15,7 @@ def process_logic_message(message):
 
 def __initialize__(message):
     __set_sensor_value__("unknown")
+
     wirehome.component.set_status("status.is_outdated", True)
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
 
@@ -61,6 +62,10 @@ def __on_outdated_countdown_callback__(_):
 
 def __set_sensor_value__(value):
     sensor_type = config.get("sensor_type", None)
+    correction_value = config.get("correction_value", 0.0)
+    
+    if type(value) == float:
+        value = value + correction_value
 
     if sensor_type == "temperature":
         wirehome.component.set_status("temperature.value", value)
