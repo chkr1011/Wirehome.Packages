@@ -52,7 +52,7 @@ def process_adapter_message(message):
 
 def __start_outdated_countdown__():
     uid = "wirehome.sensor.countdown.outdated:" + wirehome.context["component_uid"]
-    timeout = config.get("outdated_timeout", 60000)
+    timeout = config.get("outdated_timeout", 120000) # 2 minutes are used as timeout
     wirehome.scheduler.start_countdown(uid, timeout, __on_outdated_countdown_callback__)
 
 

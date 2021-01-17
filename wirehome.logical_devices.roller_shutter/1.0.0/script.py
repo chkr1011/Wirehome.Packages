@@ -1,3 +1,5 @@
+import datetime
+
 class PositionTrackerStatus:
     current_position = 0
     position_tracker_max = None
@@ -45,6 +47,7 @@ def __initialize__(message):
 
     wirehome.component.set_status("roller_shutter.state", current_state)
     wirehome.component.set_status("roller_shutter.position", None)
+    wirehome.component.set_status("roller_shutter.last_action", None)
     wirehome.component.set_status("power.state", None)
     wirehome.component.set_status("power.consumption", None)
     wirehome.component.set_configuration("app.view_source", wirehome.package_manager.get_file_uri(wirehome.context["logic_uid"], "appView.html"))
@@ -109,9 +112,10 @@ def __set_state__(command):
     #    wirehome.scheduler.stop_timer(timer_uid)
 
     wirehome.component.set_status("roller_shutter.state", final_state)
+    wirehome.component.set_status("roller_shutter.last_action", datetime.datetime.now().isoformat())
     wirehome.component.set_status("power.state", final_power_state)
     wirehome.component.set_status("power.consumption", final_power_consumption)
-
+    
     auto_off_timeout = config.get("auto_off_timeout", 60000)
     start_auto_off_countdown = final_state != "off"
 
