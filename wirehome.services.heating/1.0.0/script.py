@@ -2,6 +2,9 @@ import datetime
 import time
 import sys
 import math
+import json
+
+wirehome = {}
 
 TIMER_ID = "wirehome.heating.monitor"
 
@@ -9,8 +12,6 @@ _is_running = False
 _is_enabled = True
 
 _zones = []
-
-_zone_status = {}
 
 _last_update = None
 
@@ -34,6 +35,7 @@ class Zone:
     low_delta_temperature_reached = False
     high_delta_temperature = None
     high_delta_temperature_reached = False
+    mode = "heat"
     error = None
 
 
@@ -50,6 +52,8 @@ def start():
 
     wirehome.app.register_status_provider("heating", __get_heating_status__)
 
+    wirehome.mqtt.subscribe("wirehome.services.heating.commands", "homeassistant_adapter/command/heating/#", __on_mqtt_command_received__)
+
     global _zones
     zoneConfigs = config.get("zones", {})
     for zone_key in zoneConfigs:
@@ -63,7 +67,7 @@ def start():
         zone.config = zoneConfig
         _zones.append(zone)
 
-    monitoring_interval = config.get("monitoring", {}).get("interval", 5000)
+    monitoring_interval = config.get("monitoring", {}).get("interval", 30000)
     wirehome.scheduler.start_timer(TIMER_ID, monitoring_interval, __update_callback__)
 
     global _is_running
@@ -91,10 +95,10 @@ def disable():
 
 def get_status():
     return {
-        "is_running": _is_running,
-        "zone_status": _zone_status,
-        "last_update": _last_update,
         "is_enabled": _is_enabled,
+        "is_running": _is_running,
+        "last_update": _last_update,
+        "zones": _zones
     }
 
 
@@ -105,27 +109,91 @@ def update():
     for zone in _zones:
         __update_zone__(zone)
 
-        global _zone_status
-        _zone_status[zone.uid] = {
-            "outdoor_temperature": zone.outdoor_temperature,
-            "effective_outdoor_temperature": zone.effective_outdoor_temperature,
-            "current_temperature": zone.current_temperature,
-            "target_temperature": zone.target_temperature,
-            "effective_target_temperature": zone.effective_target_temperature,
-            "affected_mode": zone.affected_mode,
-            "affected_mode_key": zone.affected_mode_key,
-            "forced_mode": zone.forced_mode,
-            "high_delta_temperature": zone.high_delta_temperature,
-            "high_delta_temperature_reached": zone.high_delta_temperature_reached,
-            "low_delta_temperature": zone.low_delta_temperature,
-            "low_delta_temperature_reached": zone.low_delta_temperature_reached,
-            "status_reason": zone.status_reason,
-            "valve_command": zone.valve_command,
-            "error": zone.error
-        }
-
     global _last_update
     _last_update = datetime.datetime.now().isoformat()
+
+    __update_home_assistant__()
+
+
+def __on_mqtt_command_received__(message):
+    topic = message.get("topic", None)
+    if topic == None:
+        return
+
+    path = topic.split("/")
+    zone_uid = path[3]
+    command = path[4]
+    zone = None
+
+    global _zones
+    for i in _zones:
+        if i.uid == zone_uid:
+            zone = i
+            break
+
+    if command == "mode":
+        zone.mode = str(message.get("payload", "off"))
+        wirehome.value_storage.write("heating/{zone_uid}/mode".format(zone_uid=zone.uid), zone.mode)
+        update()
+    elif command == "temperature":
+        zone.target_temperature = float(str(message.get("payload", "0")))
+        wirehome.value_storage.write("heating/{zone_uid}/target_temperature".format(zone_uid=zone.uid), zone.target_temperature)
+        update()
+
+
+def __update_home_assistant__():
+    for zone in _zones:
+        current_temperature_topic = "homeassistant_adapter/value/heating/{zone_uid}/current_temperature".format(zone_uid=zone.uid)
+        temperature_state_topic = "homeassistant_adapter/value/heating/{zone_uid}/temperature".format(zone_uid=zone.uid)
+        temperature_command_topic = "homeassistant_adapter/command/heating/{zone_uid}/temperature".format(zone_uid=zone.uid)
+        mode_state_topic  = "homeassistant_adapter/value/heating/{zone_uid}/mode".format(zone_uid=zone.uid)
+        mode_command_topic  = "homeassistant_adapter/command/heating/{zone_uid}/mode".format(zone_uid=zone.uid)
+
+        unique_id = "wirehome_heating_{zone_uid}".format(zone_uid=zone.uid).replace(".", "_")
+
+        config = {
+            "platform": "mqtt",
+            "unique_id": unique_id,
+            "name": "wirehome.heating_{zone_uid}".format(zone_uid=zone.uid),
+            "current_temperature_topic": current_temperature_topic,
+            "temperature_state_topic": temperature_state_topic,
+            "temperature_command_topic": temperature_command_topic,
+            "mode_state_topic": mode_state_topic,
+            "mode_command_topic": mode_command_topic,
+            "temperature_unit": "C",
+            "temp_step": 0.1,
+            "precision": 0.1,
+            "fan_modes": [],
+            "swing_modes": [],
+            "min_temp": 16.0,
+            "max_temp": 25.0,
+            "modes": ["off", "heat"]
+        }
+
+        mqtt_message = {
+            "topic": "homeassistant/climate/{unique_id}/config".format(unique_id=unique_id), 
+            "payload": json.dumps(config, ensure_ascii=False)
+        }
+        
+        wirehome.mqtt.publish(mqtt_message)
+
+        mqtt_message["retain"] = True
+
+        mqtt_message["topic"] = current_temperature_topic
+        mqtt_message["payload"] = str(zone.current_temperature)
+        wirehome.mqtt.publish(mqtt_message)
+
+        mqtt_message["topic"] = temperature_state_topic
+        mqtt_message["payload"] = str(zone.target_temperature)
+        wirehome.mqtt.publish(mqtt_message)
+
+        mode = "off"
+        if zone.mode == "heat":
+            mode = "heat"
+
+        mqtt_message["topic"] = mode_state_topic
+        mqtt_message["payload"] = mode
+        wirehome.mqtt.publish(mqtt_message)
 
 
 def __update_callback__(_):
@@ -137,16 +205,16 @@ def __update_zone__(zone):
         wirehome.log.info("Updating heating zone '{uid}'.".format(uid=zone.uid))
 
         zone.error = None
+        zone.mode = wirehome.value_storage.read_string("heating/{zone_uid}/mode".format(zone_uid=zone.uid), "heat")
+        zone.valve_command = "close"
 
         __fill_outdoor_temperature__(zone)
         __fill_affected_mode__(zone)
         __fill_target_temperature__(zone)
         __fill_window_status__(zone)
         __fill_current_temperature__(zone)
-
-        valve_command = "close"
-
-        if zone.target_temperature == "off":
+        
+        if zone.mode == "off":
             zone.status_reason = "manual_disable"
         elif zone.effective_outdoor_temperature != None and zone.effective_outdoor_temperature >= zone.high_delta_temperature:
             zone.status_reason = "outdoor_temperature_is_higher"
@@ -159,13 +227,10 @@ def __update_zone__(zone):
         elif zone.current_temperature < zone.high_delta_temperature and not zone.low_delta_temperature_reached:
             zone.status_reason = "low_delta_temperature_not_reached"
         else:
-            valve_command = "open"
+            zone.valve_command = "open"
             zone.status_reason = "heating_required"
 
-        zone.valve_command = valve_command
-
-        __update_valves__(zone, valve_command)
-
+        __update_valves__(zone)
     except:
         wirehome.log.error(sys.exc_info())
         zone.error = "error"  # sys.exc_info()[0]
@@ -199,7 +264,9 @@ def __fill_outdoor_temperature__(zone):
 
 
 def __fill_target_temperature__(zone):
-    zone.target_temperature = zone.config.get("target_temperature", 20)
+    default_target_temperature = zone.config.get("target_temperature", 20)
+    zone.target_temperature = wirehome.value_storage.read_float("heating/{zone_uid}/target_temperature".format(zone_uid=zone.uid), default_target_temperature)
+
     zone.effective_target_temperature = zone.target_temperature
 
     if zone.affected_mode != None:
@@ -238,9 +305,9 @@ def __fill_current_temperature__(zone):
             zone.low_delta_temperature_reached = False
 
 
-def __update_valves__(zone, status):
+def __update_valves__(zone):
     command = {"type": "close"}
-    if (status == "open"):
+    if (zone.valve_command == "open"):
         command = {"type": "open"}
 
     valves = zone.config.get("valves", {})
@@ -250,6 +317,7 @@ def __update_valves__(zone, status):
 
 def __fill_window_status__(zone):
     windows = zone.config.get("windows", {})
+
     for window_key in windows:
         window_status = wirehome.component_registry.get_status(window_key, "window.state", None)
 
@@ -321,9 +389,12 @@ def __get_heating_status__():
         zones.append({
             "uid": zone.uid,
             "status_reason": zone.status_reason,
+            "target_temperature": zone.target_temperature,
             "current_temperature": zone.current_temperature,
             "effective_target_temperature": zone.effective_target_temperature,
-            "valve_command": zone.valve_command
+            "valve_command": zone.valve_command,
+            "mode": zone.mode,
+            "error": zone.error
         })
 
     status["zones"] = zones
