@@ -1,5 +1,6 @@
 SERVICE_ID = "wirehome.services.cc_tools.board_manager"
 
+wirehome = {}
 config = {}
 
 

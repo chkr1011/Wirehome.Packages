@@ -1,4 +1,5 @@
 config = {}
+wirehome = {}
 
 
 def process_adapter_message(message):
