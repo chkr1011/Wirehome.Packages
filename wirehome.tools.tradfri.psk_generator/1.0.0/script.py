@@ -1,6 +1,7 @@
 import json
 import uuid
 
+wirehome = {}
 
 def main(parameters):
     # Mandatory parameters

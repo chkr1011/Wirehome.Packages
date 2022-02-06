@@ -4,7 +4,7 @@ from time import sleep
 TIMER_ID = "wirehome.tradfri.gateway_manager.polling"
 
 config = {}
-
+wirehome = {}
 
 _devices = {}
 _gateway_is_connected = False

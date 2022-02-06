@@ -14,9 +14,13 @@ BOARD_HS_PE_8_OUT = "HSPE8-OUT"
 BOARD_HS_RB_16 = "HSRB16"
 
 config = {}
+wirehome = {}
+
 is_running = False
-message_bus_subscription = None
+message_bus_interrupt_subscription = "wirehome.cc_tools.board_manager.gpio_state_changed"
+interrupt_uid = None
 output_devices = []
+gpio_interrupts = {}
 devices = {}
 devices_with_interrupt_polling = []
 devices_with_state_polling = []
@@ -72,11 +76,9 @@ def start():
         "type": "gpio_registry.event.state_changed"
     }
 
-    global message_bus_subscription
-    uid = "wirehome.cc_tools.board_manager.gpio_state_changed"
-    message_bus_subscription = wirehome.message_bus.subscribe(
-        uid, filter, __handle_interrupt__)
-
+    wirehome.message_bus.subscribe(
+        message_bus_interrupt_subscription, filter, __handle_interrupt__)
+    
     if len(devices_with_state_polling) > 0:
         wirehome.scheduler.start_thread(
             "cc_tools.board_manager.poll_states", __poll_states_thread__)
@@ -90,9 +92,8 @@ def stop():
     global is_running
     is_running = False
 
-    if message_bus_subscription != None:
-        wirehome.message_bus.unsubscribe(message_bus_subscription)
-
+    wirehome.message_bus.unsubscribe(message_bus_interrupt_subscription)
+        
 
 def commit_device_states():
     for device in output_devices:
@@ -324,6 +325,26 @@ def __initialize_devices__():
         __initialize_device__(device_uid, device_config)
 
 
+def __on_gpio_interrupt__(parameters):
+    gpio_host_id = parameters.get("gpio_host_id", "")
+    gpio_id = parameters.get("gpio_id", None)
+
+    for device_uid in devices:
+        device = devices[device_uid]
+
+        if device.interrupt_gpio_host_id == gpio_host_id and device.interrupt_gpio_id == gpio_id:
+            __poll_state__(device)
+
+
+def __setup_gpio_interrupt_handler__(gpio_host_id, gpio_id):
+    if gpio_id == None:
+        return
+
+    interrupt_uid = gpio_host_id + "_" + str(gpio_id)
+
+    wirehome.gpio.attach_interrupt(interrupt_uid, gpio_host_id, gpio_id, "falling", __on_gpio_interrupt__)
+
+
 def __initialize_device__(device_uid, config):
     try:
         device = Device()
@@ -337,13 +358,13 @@ def __initialize_device__(device_uid, config):
             "interrupt_gpio_host_id", "")
         device.interrupt_gpio_id = config.get("interrupt_gpio_id", None)
 
+        global gpio_interrupts
         global devices_with_interrupt_polling
         global devices_with_state_polling
-
+        
         if device.fetch_mode == "interrupt":
             if device.interrupt_gpio_id != None:
-                wirehome.gpio.enable_interrupt(
-                    device.interrupt_gpio_host_id, device.interrupt_gpio_id)
+                __setup_gpio_interrupt_handler__(device.interrupt_gpio_host_id, device.interrupt_gpio_id)
         elif device.fetch_mode == "poll_interrupt":
             if device.interrupt_gpio_id != None:
                 wirehome.gpio.set_direction(
@@ -425,7 +446,7 @@ def __poll_interrupts_thread__(_):
 
 def __poll_states_thread__(_):
     while is_running == True:
-        sleep(0.100)  # 100 ms
+        sleep(0.050)  # 50 ms
 
         for device in devices_with_state_polling:
             __poll_state__(device)

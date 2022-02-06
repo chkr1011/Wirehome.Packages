@@ -1,5 +1,5 @@
 config = {}
-
+wirehome = {}
 
 def process_logic_message(message):
     type = message.get("type", None)
@@ -45,7 +45,13 @@ def __initialize__(message):
         return adapter_result
 
     initial_state = config.get("initial_state", "off")
+    #initial_state = wirehome.value_storage.read(__get_value_storage_path__(), initial_state)
     return __set_state__(initial_state)
+
+
+def __get_value_storage_path__():
+    component_uid = wirehome.context["component_uid"]
+    return "{component_uid}/state".format(component_uid=component_uid)
 
 
 def __set_state__(state):
@@ -53,10 +59,10 @@ def __set_state__(state):
     if not is_enabled:
         return wirehome.response_creator.disabled()
 
+    type = "turn_off"
+
     if state == "on":
         type = "turn_on"
-    elif state == "off":
-        type = "turn_off"
 
     adapter_result = wirehome.publish_adapter_message({
         "type": type
@@ -78,6 +84,8 @@ def __set_state__(state):
 
         if static_power_consumption != None:
             wirehome.component.set_status("power.consumption", 0)
+
+    #wirehome.value_storage.write(__get_value_storage_path__(), state)
 
     return {
         "type": "success"

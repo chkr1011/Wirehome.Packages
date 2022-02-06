@@ -1,4 +1,3 @@
-import time
 import json
 
 wirehome = None
@@ -9,63 +8,11 @@ def initialize():
 
 
 def start():
-    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changing" }, on_component_state_changing)
-    wirehome.message_bus.unsubscribe("homeassistant_adapter.state_forwarder.component_state_changed")
-
+    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changing" }, __on_component_state_changing__)
     wirehome.mqtt.subscribe("homeassistant_adapter.command_receiver", "homeassistant_adapter/command/#", on_mqtt_command_received)
 
-    publish_components()
-    wirehome.scheduler.start_timer("homeassistant_adapter.publish", 300000, on_publish_timer_elapsed, None)
-
-
-def publish_components():
-
-    for component_uid in wirehome.component_registry.get_uids():
-        if not wirehome.component_registry.is_initialized(component_uid):
-            continue
-
-        # Publish sensors
-        if wirehome.component_registry.has_status(component_uid, "temperature.value"):
-            publish_sensor(component_uid, "temperature.value", "temperature", "°C", 240, 1)
-        
-        if wirehome.component_registry.has_status(component_uid, "humidity.value"):
-            publish_sensor(component_uid, "humidity.value", "humidity", "%", 240, 0)
-
-        if wirehome.component_registry.has_status(component_uid, "pressure.value"):
-            publish_sensor(component_uid, "pressure.value", "pressure", "hPa", 240, 0)
-
-        if wirehome.component_registry.has_status(component_uid, "meter.value"):
-            publish_sensor(component_uid, "meter.value", None, "m³", 240, 3)
-
-        if wirehome.component_registry.has_status(component_uid, "meter.is_active"):
-            publish_binary_sensor(component_uid, "meter.is_active", "heat")
-            
-        if wirehome.component_registry.has_status(component_uid, "motion_detection.state"):
-            publish_binary_sensor(component_uid, "motion_detection.state", "motion")
-            
-        if wirehome.component_registry.has_status(component_uid, "window.state"):
-            publish_window(component_uid)
-            
-        if wirehome.component_registry.has_status(component_uid, "button.state"): 
-            publish_button(component_uid)
-            
-        # Publish actuators
-        if wirehome.component_registry.has_status(component_uid, "roller_shutter.state"):
-            publish_roller_shutter(component_uid)
-            
-        if wirehome.component_registry.has_status(component_uid, "level.current"): 
-            publish_fan(component_uid)
-            
-        if wirehome.component_registry.has_status(component_uid, "valve.state"): 
-            publish_valve(component_uid)
-            
-        if wirehome.component_registry.has_status(component_uid, "power.state"): 
-            if wirehome.component_registry.get_logic_id(component_uid) == "wirehome.logical_devices.lamp": 
-                publish_light(component_uid)
-            else:
-                publish_switch(component_uid)
-
-        publish_component_states(component_uid)
+    __publish_components__()
+    wirehome.scheduler.start_timer("homeassistant_adapter.publish", 300000, __on_publish_timer_elapsed__, None)
 
 
 def stop():
@@ -74,28 +21,108 @@ def stop():
 
 def get_debug_infomation(_):
     return {
-        
     }
 
 
-def on_publish_timer_elapsed(parameters):
-    publish_components()
+def __publish_components__():
+
+    for component_uid in wirehome.component_registry.get_uids():
+        if not wirehome.component_registry.is_initialized(component_uid):
+            continue
+
+        # Publish sensors
+        if wirehome.component_registry.has_status(component_uid, "temperature.value"):
+            __publish_sensor__(component_uid, "temperature.value", "temperature", "°C", 240, 1)
+        
+        if wirehome.component_registry.has_status(component_uid, "humidity.value"):
+            __publish_sensor__(component_uid, "humidity.value", "humidity", "%", 240, 0)
+
+        if wirehome.component_registry.has_status(component_uid, "pressure.value"):
+            __publish_sensor__(component_uid, "pressure.value", "pressure", "hPa", 240, 0)
+
+        if wirehome.component_registry.has_status(component_uid, "meter.value"):
+            __publish_sensor__(component_uid, "meter.value", None, "m³", 240, 3)
+
+        if wirehome.component_registry.has_status(component_uid, "meter.is_active"):
+            __publish_binary_sensor__(component_uid, "meter.is_active", "heat")
+            
+        if wirehome.component_registry.has_status(component_uid, "motion_detection.state"):
+            __publish_binary_sensor__(component_uid, "motion_detection.state", "motion")
+            
+        if wirehome.component_registry.has_status(component_uid, "window.state"):
+            __publish_window__(component_uid)
+            
+        if wirehome.component_registry.has_status(component_uid, "button.state"): 
+            __publish_button__(component_uid)
+            
+        # Publish actuators
+        if wirehome.component_registry.has_status(component_uid, "roller_shutter.state"):
+            __publish_roller_shutter__(component_uid)
+            
+        if wirehome.component_registry.has_status(component_uid, "level.current"): 
+            __publish_fan__(component_uid)
+            
+        if wirehome.component_registry.has_status(component_uid, "valve.state"): 
+            __publish_valve__(component_uid)
+            
+        if wirehome.component_registry.has_status(component_uid, "power.state"): 
+            if wirehome.component_registry.get_logic_id(component_uid) == "wirehome.logical_devices.lamp": 
+                __publish_light__(component_uid)
+            else:
+                __publish_switch__(component_uid)
+
+        __publish_component_states__(component_uid)
 
 
-def on_component_state_changing(message):
+def __on_publish_timer_elapsed__(parameters):
+    __publish_components__()
+
+
+def __on_component_state_changing__(message):
     component_uid = message.get("component_uid", None)
     if component_uid == None:
         return
 
     status_uid = message.get("status_uid", None)
-    new_value = message.get("new_value", None)
+    if status_uid == None:
+        return
 
-    #publish_state(component_uid, status_uid, new_value)
+    # Ignore some component state changes which will handled implicitly to increase performance.
+    implicit_states = [
+        "status.is_outdated", 
+        "roller_shutter.position",
+        "roller_shutter.last_action",
+        "power.consumption",
+        "motion_detection.last_detection",
+        "window.last_opened",
+        "window.last_closed",
+        "window.last_tilt",
+        "brightness.value",
+        "color.value"]
 
-    publish_component_states(component_uid)
+    if status_uid in implicit_states:
+        return
+
+    __publish_component_states__(component_uid)
 
 
-def publish_component_states(component_uid):
+def __publish_availability__(component_uid):
+    availability_topic = "homeassistant_adapter/value/{component_uid}/availability".format(component_uid=component_uid)
+
+    value = "online"
+    is_outdated = wirehome.component_registry.get_status(component_uid, "status.is_outdated", False)
+    if is_outdated:
+        value = "offline"
+
+    mqtt_message = {
+        "topic": availability_topic, 
+        "payload": value
+    }
+
+    wirehome.mqtt.publish(mqtt_message)
+
+
+def __publish_component_states__(component_uid):
     if not wirehome.component_registry.is_initialized(component_uid):
         return
 
@@ -111,6 +138,7 @@ def publish_component_states(component_uid):
         }
 
         wirehome.mqtt.publish(mqtt_message)
+        __publish_availability__(component_uid)
 
     #
     # Humidity > Value
@@ -124,6 +152,7 @@ def publish_component_states(component_uid):
         }
 
         wirehome.mqtt.publish(mqtt_message)
+        __publish_availability__(component_uid)
 
     #
     # Pressure > Value
@@ -137,6 +166,7 @@ def publish_component_states(component_uid):
         }
 
         wirehome.mqtt.publish(mqtt_message)
+        __publish_availability__(component_uid)
 
     #
     # Motion detection > State
@@ -167,6 +197,7 @@ def publish_component_states(component_uid):
         }
 
         wirehome.mqtt.publish(mqtt_message)
+        __publish_availability__(component_uid)
         
     #
     # Meter > Is active
@@ -184,6 +215,7 @@ def publish_component_states(component_uid):
         }
 
         wirehome.mqtt.publish(mqtt_message)
+        __publish_availability__(component_uid)
 
     #
     # Roller Shutter > State
@@ -235,7 +267,7 @@ def publish_component_states(component_uid):
         wirehome.mqtt.publish(mqtt_message)
 
     #
-    # Window > State
+    # Level > Current
     #
     level_current = wirehome.component_registry.get_status(component_uid, "level.current", None)
     if level_current != None:
@@ -370,7 +402,7 @@ def on_mqtt_command_received(message):
         wirehome.component_registry.process_message(component_uid, message)
 
 
-def publish_binary_sensor(component_uid, status_uid, device_class):   
+def __publish_binary_sensor__(component_uid, status_uid, device_class):   
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
 
     config = {
@@ -378,14 +410,16 @@ def publish_binary_sensor(component_uid, status_uid, device_class):
         "device_class": device_class
     }
 
-    publish("binary_sensor", component_uid, status_uid, config)
+    __publish__("binary_sensor", component_uid, status_uid, config)
 
 
-def publish_sensor(component_uid, status_uid, device_class, unit_of_measurement, expire_after, round):
+def __publish_sensor__(component_uid, status_uid, device_class, unit_of_measurement, expire_after, round):
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
+    availability_topic = "homeassistant_adapter/value/{component_uid}/availability".format(component_uid=component_uid, status_uid=status_uid)
 
     config = {
         "state_topic": state_topic,
+        "availability_topic": availability_topic,
         "unit_of_measurement": unit_of_measurement,
         "value_template": "{{ value | round(" + str(round) + ") }}"
     }
@@ -396,10 +430,10 @@ def publish_sensor(component_uid, status_uid, device_class, unit_of_measurement,
     if expire_after > 0:
         config["expire_after"] = expire_after
 
-    publish("sensor", component_uid, status_uid, config)
+    __publish__("sensor", component_uid, status_uid, config)
 
 
-def publish_switch(component_uid):
+def __publish_switch__(component_uid):
     status_uid = "power.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -410,10 +444,10 @@ def publish_switch(component_uid):
         "command_topic": command_topic,
     }
 
-    publish("switch", component_uid, status_uid, config)
+    __publish__("switch", component_uid, status_uid, config)
 
 
-def publish_light(component_uid):
+def __publish_light__(component_uid):
     status_uid = "power.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -424,10 +458,10 @@ def publish_light(component_uid):
         "command_topic": command_topic,
     }
 
-    publish("light", component_uid, status_uid, config)
+    __publish__("light", component_uid, status_uid, config)
 
 
-def publish_roller_shutter(component_uid):
+def __publish_roller_shutter__(component_uid):
     status_uid = "roller_shutter.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -443,10 +477,10 @@ def publish_roller_shutter(component_uid):
         "position_template": "{{ 50 }}",
     }
 
-    publish("cover", component_uid, status_uid, config)
+    __publish__("cover", component_uid, status_uid, config)
 
 
-def publish_window(component_uid):
+def __publish_window__(component_uid):
     status_uid = "window.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -456,7 +490,7 @@ def publish_window(component_uid):
         "state_topic": state_topic
     }
 
-    publish("binary_sensor", component_uid, status_uid, config)
+    __publish__("binary_sensor", component_uid, status_uid, config)
 
     status_uid = "window.state.tilt"
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -466,10 +500,10 @@ def publish_window(component_uid):
         "state_topic": state_topic
     }
 
-    publish("binary_sensor", component_uid, status_uid, config)
+    __publish__("binary_sensor", component_uid, status_uid, config)
 
 
-def publish_fan(component_uid):
+def __publish_fan__(component_uid):
     status_uid = "level.current"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -490,10 +524,10 @@ def publish_fan(component_uid):
         "percentage_command_topic": percentage_command_topic
     }
 
-    publish("fan", component_uid, status_uid, config)
+    __publish__("fan", component_uid, status_uid, config)
 
 
-def publish_button(component_uid):
+def __publish_button__(component_uid):
     status_uid = "button.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -502,10 +536,10 @@ def publish_button(component_uid):
         "state_topic": state_topic
     }
 
-    publish("binary_sensor", component_uid, status_uid, config)
+    __publish__("binary_sensor", component_uid, status_uid, config)
 
 
-def publish_valve(component_uid):
+def __publish_valve__(component_uid):
     status_uid = "valve.state"
 
     state_topic = "homeassistant_adapter/value/{component_uid}/{status_uid}".format(component_uid=component_uid, status_uid=status_uid)
@@ -516,10 +550,10 @@ def publish_valve(component_uid):
         "command_topic": command_topic,
     }
 
-    publish("switch", component_uid, status_uid, config)
+    __publish__("switch", component_uid, status_uid, config)
 
 
-def publish(domain, component_uid, status_uid, config):
+def __publish__(domain, component_uid, status_uid, config):
     unique_id = ("wirehome_" + component_uid + "_" + status_uid).replace(".", "_")
     discovery_topic = "homeassistant/{domain}/{unique_id}/config".format(domain=domain, unique_id=unique_id)
 
