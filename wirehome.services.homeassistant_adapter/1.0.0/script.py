@@ -1,4 +1,5 @@
 import json
+from time import sleep
 
 wirehome = None
 config = {}
@@ -8,7 +9,7 @@ def initialize():
 
 
 def start():
-    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changing" }, __on_component_state_changing__)
+    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changing", "value_has_changed": True }, __on_component_state_changing__)
     wirehome.mqtt.subscribe("homeassistant_adapter.command_receiver", "homeassistant_adapter/command/#", on_mqtt_command_received)
 
     __publish_components__()
@@ -29,6 +30,9 @@ def __publish_components__():
     for component_uid in wirehome.component_registry.get_uids():
         if not wirehome.component_registry.is_initialized(component_uid):
             continue
+
+        # Wait some ms so that the MQTT broker not gets flooded with messages.
+        sleep(0.1)
 
         # Publish sensors
         if wirehome.component_registry.has_status(component_uid, "temperature.value"):
@@ -98,7 +102,8 @@ def __on_component_state_changing__(message):
         "window.last_closed",
         "window.last_tilt",
         "brightness.value",
-        "color.value"]
+        "color.value",
+        "last_update"]
 
     if status_uid in implicit_states:
         return
@@ -419,7 +424,7 @@ def __publish_sensor__(component_uid, status_uid, device_class, unit_of_measurem
 
     config = {
         "state_topic": state_topic,
-        "availability_topic": availability_topic,
+        #"availability_topic": availability_topic,
         "unit_of_measurement": unit_of_measurement,
         "value_template": "{{ value | round(" + str(round) + ") }}"
     }

@@ -221,6 +221,8 @@ def __update_zone__(zone):
         elif zone.window_status != "closed":
             zone.status_reason = "window_open"
         elif zone.current_temperature == None:
+            # Open the valve so that heating still works if the sensor is down.
+            zone.valve_command = "open"
             zone.status_reason = "current_temperature_invalid"
         elif zone.high_delta_temperature_reached:
             zone.status_reason = "high_delta_temperature_reached"
@@ -280,17 +282,20 @@ def __fill_target_temperature__(zone):
 
 
 def __fill_current_temperature__(zone):
-    temperature_sensors = zone.config.get("temperature_sensors", {})
-
     current_temperature = None
 
+    temperature_sensors = zone.config.get("temperature_sensors", {})
     for sensor_key in temperature_sensors:
         temperature = wirehome.component_registry.get_status(sensor_key, "temperature.value", None)
+
+        if not isinstance(temperature, float):
+            continue
+
         if temperature != None:
             if current_temperature == None or temperature < current_temperature:
                 current_temperature = temperature
 
-    if not math.isnan(current_temperature):
+    if current_temperature != None and not math.isnan(current_temperature):
         zone.current_temperature = current_temperature
     else:
         zone.current_temperature = None
@@ -303,6 +308,10 @@ def __fill_current_temperature__(zone):
 
         if zone.high_delta_temperature_reached:
             zone.low_delta_temperature_reached = False
+    else:
+        zone.low_delta_temperature_reached = False
+        zone.high_delta_temperature_reached = False
+
 
 
 def __update_valves__(zone):
