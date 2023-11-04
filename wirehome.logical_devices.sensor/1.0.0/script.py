@@ -54,6 +54,8 @@ def process_adapter_message(message):
         sensor_type = config.get("sensor_type", None)
         if sensor_type == "humidity":
             value_round_digits = 0
+        elif sensor_type == "pressure":
+            value_round_digits = 0
 
         value_round_digits = config.get("value_round_digits", value_round_digits)
         new_value = round(new_value, value_round_digits)      
