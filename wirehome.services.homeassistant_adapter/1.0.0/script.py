@@ -9,7 +9,7 @@ def initialize():
 
 
 def start():
-    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changing", "value_has_changed": True }, __on_component_state_changing__)
+    wirehome.message_bus.subscribe("homeassistant_adapter.state_forwarder.component_state_changing", { "type": "component_registry.event.status_changed" }, __on_component_state_changing__)
     wirehome.mqtt.subscribe("homeassistant_adapter.command_receiver", "homeassistant_adapter/command/#", on_mqtt_command_received)
 
     __publish_components__()
@@ -58,7 +58,7 @@ def __publish_components__():
             
         if wirehome.component_registry.has_status(component_uid, "button.state"): 
             __publish_button__(component_uid)
-            
+
         # Publish actuators
         if wirehome.component_registry.has_status(component_uid, "roller_shutter.state"):
             __publish_roller_shutter__(component_uid)
@@ -82,6 +82,20 @@ def __on_publish_timer_elapsed__(parameters):
     __publish_components__()
 
 
+implicit_states = [
+    "status.is_outdated", 
+    "roller_shutter.position",
+    "roller_shutter.last_action",
+    "power.consumption",
+    "motion_detection.last_detection",
+    "window.last_opened",
+    "window.last_closed",
+    "window.last_tilt",
+    "brightness.value",
+    "color.value",
+    "last_update"]
+
+
 def __on_component_state_changing__(message):
     component_uid = message.get("component_uid", None)
     if component_uid == None:
@@ -92,19 +106,6 @@ def __on_component_state_changing__(message):
         return
 
     # Ignore some component state changes which will handled implicitly to increase performance.
-    implicit_states = [
-        "status.is_outdated", 
-        "roller_shutter.position",
-        "roller_shutter.last_action",
-        "power.consumption",
-        "motion_detection.last_detection",
-        "window.last_opened",
-        "window.last_closed",
-        "window.last_tilt",
-        "brightness.value",
-        "color.value",
-        "last_update"]
-
     if status_uid in implicit_states:
         return
 
@@ -130,6 +131,29 @@ def __publish_availability__(component_uid):
 def __publish_component_states__(component_uid):
     if not wirehome.component_registry.is_initialized(component_uid):
         return
+
+    #
+    # Button > State
+    #
+    button_state = wirehome.component_registry.get_status(component_uid, "button.state", None)
+    if button_state != None:
+        payload = "OFF"
+        if button_state == "pressed":
+            payload = "ON"
+
+            trigger_message = {                
+                "topic": "homeassistant_adapter/trigger/wirehome_{component_uid}/action".format(component_uid=component_uid).replace(".", "_"), 
+                "payload": "button_short_press"
+            }
+
+            wirehome.mqtt.publish(trigger_message)
+
+        mqtt_message = {
+            "topic": "homeassistant_adapter/value/{component_uid}/button.state".format(component_uid=component_uid), 
+            "payload": payload
+        }
+
+        wirehome.mqtt.publish(mqtt_message)
 
     #
     # Temperature > Value
@@ -185,7 +209,7 @@ def __publish_component_states__(component_uid):
         mqtt_message = {
             "topic": "homeassistant_adapter/value/{component_uid}/motion_detection.state".format(component_uid=component_uid), 
             "payload": payload,
-            "retain": True
+            "retain": False
         }
 
         wirehome.mqtt.publish(mqtt_message)
@@ -237,7 +261,7 @@ def __publish_component_states__(component_uid):
         mqtt_message = {
             "topic": "homeassistant_adapter/value/{component_uid}/roller_shutter.state".format(component_uid=component_uid), 
             "payload": payload,
-            "retain": True
+            "retain": False
         }
 
         wirehome.mqtt.publish(mqtt_message)
@@ -291,23 +315,6 @@ def __publish_component_states__(component_uid):
         mqtt_message = {
             "topic": "homeassistant_adapter/value/{component_uid}/level.current/percentage".format(component_uid=component_uid), 
             "payload": str(level_current),
-            "retain": True
-        }
-
-        wirehome.mqtt.publish(mqtt_message)
-
-    #
-    # Button > State
-    #
-    button_state = wirehome.component_registry.get_status(component_uid, "button.state", None)
-    if button_state != None:
-        payload = "OFF"
-        if button_state == "pressed":
-            payload = "ON"
-
-        mqtt_message = {
-            "topic": "homeassistant_adapter/value/{component_uid}/button.state".format(component_uid=component_uid), 
-            "payload": payload,
             "retain": True
         }
 
@@ -542,6 +549,32 @@ def __publish_button__(component_uid):
     }
 
     __publish__("binary_sensor", component_uid, status_uid, config)
+
+    # homeassistant_adapter/trigger/wirehome_office_button_door_top_left/action
+    trigger_config = {
+        "automation_type": "trigger",
+        "type": "button_short_press",
+        "subtype": "button_1",
+        "payload": "button_short_press",
+        "topic": "homeassistant_adapter/trigger/wirehome_{component_uid}/action".format(component_uid=component_uid).replace(".", "_"),
+        "device": {
+            "identifiers": [
+                "wirehome_{component_uid}".format(component_uid=component_uid)
+            ],
+            "name": "wirehome_{component_uid}".format(component_uid=component_uid),
+            "sw_version": "1.0.0",
+            "model": "Wirehome Button",
+            "manufacturer": "Christian Kratky"
+        
+        }
+    }
+
+    trigger_config_message = {
+        "topic": "homeassistant/device_automation/wirehome_{component_uid}/pressed/config".format(component_uid=component_uid).replace(".", "_"),
+        "payload": generate_json(trigger_config)
+    }
+
+    wirehome.mqtt.publish(trigger_config_message)
 
 
 def __publish_valve__(component_uid):
